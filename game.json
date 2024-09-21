@@ -1,0 +1,74 @@
+{
+	"width": 1280,
+	"height": 720,
+	"fps": 60,
+	"main": "./script/main.js",
+	"assets": {
+		"main": {
+			"type": "script",
+			"path": "script/main.js",
+			"global": true
+		},
+		"haikei": {
+			"type": "image",
+			"width": 1280,
+			"height": 720,
+			"path": "image/haikei.png"
+		},
+		"Main_botti": {
+			"type": "image",
+			"width": 45,
+			"height": 59,
+			"path": "image/Main_botti.png"
+		},
+		"NPC_botti": {
+			"type": "image",
+			"width": 45,
+			"height": 59,
+			"path": "image/NPC_botti.png"
+		},
+		"Main_OK": {
+			"type": "image",
+			"width": 45,
+			"height": 59,
+			"path": "image/Main_OK.png"
+		},
+		"NPC_OK": {
+			"type": "image",
+			"width": 45,
+			"height": 59,
+			"path": "image/NPC_OK.png"
+		}
+	},
+	"environment": {
+		"sandbox-runtime": "3",
+		"nicolive": {
+			"supportedModes": [
+				"multi_admission"
+			],
+			"preferredSessionParameters": {
+				"totalTimeLimit": 75
+			}
+		},
+		"external": {
+			"coeLimited": "0"
+		}
+	},
+	"globalScripts": [
+		"node_modules/@akashic-extension/akashic-hover-plugin/lib/Converter.js",
+		"node_modules/@akashic-extension/akashic-hover-plugin/lib/HoverPlugin.js",
+		"node_modules/@akashic-extension/akashic-hover-plugin/lib/index.js",
+		"node_modules/@akashic-extension/resolve-player-info/lib/FallbackDialog.js",
+		"node_modules/@akashic-extension/resolve-player-info/lib/index.js",
+		"node_modules/@akashic-extension/akashic-timeline/lib/ActionType.js",
+		"node_modules/@akashic-extension/akashic-timeline/lib/Easing.js",
+		"node_modules/@akashic-extension/akashic-timeline/lib/Timeline.js",
+		"node_modules/@akashic-extension/akashic-timeline/lib/Tween.js",
+		"node_modules/@akashic-extension/akashic-timeline/lib/index.js"
+	],
+	"moduleMainScripts": {
+		"@akashic-extension/akashic-hover-plugin": "node_modules/@akashic-extension/akashic-hover-plugin/lib/index.js",
+		"@akashic-extension/resolve-player-info": "node_modules/@akashic-extension/resolve-player-info/lib/index.js",
+		"@akashic-extension/akashic-timeline": "node_modules/@akashic-extension/akashic-timeline/lib/index.js"
+	}
+}
