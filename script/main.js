@@ -80,10 +80,20 @@ function main(param) {
       // 各プレイヤーが名前利用許諾のダイアログに応答した時、通知されます。
       // ev.player.name にそのプレイヤーの名前が含まれます。
       // (ev.player.id には (最初から) プレイヤーIDが含まれています)
-      //プレイヤー画像
+
+      const isLocalPlayer = ev.player.id === g.game.selfId;
+
+      // プレイヤー画像
+      const imageOk = scene.assets[isLocalPlayer ? "Main_OK" : "NPC_OK"];
+      const imageNg = scene.assets[isLocalPlayer ? "Main_botti" : "NPC_botti"];
+
       PlayerIds.push(ev.player.id);
-      
-      g.game.raiseEvent(new g.MessageEvent({ message: "Player_Add", Id: ev.player.id, Name: ev.player.name, x: getrandom(20,1260,-1), y: getrandom(y_limit,700,-1)}));
+      let playerImage = new g.FrameSprite({scene: scene, src: imageNg,
+        x: getrandom(20,1260,-1), y: getrandom(y_limit,700,-1), opacity: 1, local: false, hidden:true});
+      scene.append(playerImage);
+      playerImage.invalidate();
+
+      PlayerDatas[ev.player.id] = {Name:ev.player.name, Main_Player:playerImage, moveX:0, moveY:0, imageD:0, sotuThen:false, destoroyed:false, imageOk:imageOk, imageNg:imageNg};
 
       playercntLabel.text = String(PlayerIds.length) + "人",
       playercntLabel.invalidate();
@@ -269,15 +279,6 @@ function main(param) {
           gamesecondLabel.invalidate();
           break;
 
-        case "Player_Add":
-          let playerImage = new g.FrameSprite({scene: scene, src: scene.assets["NPC_botti"],
-            x: ev.data.x, y: ev.data.y, opacity: 1, local: false, hidden:true});
-          scene.append(playerImage);
-          playerImage.invalidate();
-
-          PlayerDatas[ev.data.Id] = {Name:ev.data.Name, Main_Player:playerImage, moveX:0, moveY:0, imageD:0, sotuThen:false, destoroyed:false};
-          break;
-
         case "Player_Move":
           PlayerIds.forEach(Id => {
             //卒業判定
@@ -316,13 +317,7 @@ function main(param) {
             }
             //プレイヤー画像更新
             PlayerDatas[Id].sotuThen = result;
-            if (result == true){
-              PlayerDatas[Id].Main_Player.src = scene.assets["NPC_OK"];
-            }
-            else{
-              PlayerDatas[Id].Main_Player.src = scene.assets["NPC_botti"];
-            }
-
+            PlayerDatas[Id].Main_Player.src = result ? PlayerDatas[Id].imageOk : PlayerDatas[Id].imageNg;
             PlayerDatas[Id].Main_Player.invalidate();
           });
 
