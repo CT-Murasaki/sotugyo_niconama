@@ -7,6 +7,11 @@ let PlayerDatas = [{}];
 let PlayerIds = [];
 let sotugyolabels = [];
 let taigakulabels = [];
+let font = new g.DynamicFont({
+  game: g.game,
+  fontFamily: "sans-serif",
+  size: 45
+});
 
 function main(param) {
   let assetIds = ["haikei","Main_botti","NPC_botti","Main_OK","NPC_OK"];
@@ -19,11 +24,7 @@ function main(param) {
   let sotugyoThen = false;
   let gamesecond = 15;
 
-  let font = new g.DynamicFont({
-    game: g.game,
-    fontFamily: "sans-serif",
-    size: 45
-  });
+
 
   let gametime = 0;
   let settingObj,settingstrs,sankaObj,startObj,playercntObj
@@ -80,10 +81,20 @@ function main(param) {
       // 各プレイヤーが名前利用許諾のダイアログに応答した時、通知されます。
       // ev.player.name にそのプレイヤーの名前が含まれます。
       // (ev.player.id には (最初から) プレイヤーIDが含まれています)
-      //プレイヤー画像
+
+      const isLocalPlayer = ev.player.id === g.game.selfId;
+
+      // プレイヤー画像
+      const imageOk = scene.assets[isLocalPlayer ? "Main_OK" : "NPC_OK"];
+      const imageNg = scene.assets[isLocalPlayer ? "Main_botti" : "NPC_botti"];
+
       PlayerIds.push(ev.player.id);
-      
-      g.game.raiseEvent(new g.MessageEvent({ message: "Player_Add", Id: ev.player.id, Name: ev.player.name, x: getrandom(20,1260,-1), y: getrandom(y_limit,700,-1)}));
+      let playerImage = new g.FrameSprite({scene: scene, src: imageNg,
+        x: getrandom(20,1260,-1), y: getrandom(y_limit,700,-1), opacity: 1, local: false, hidden:true});
+      scene.append(playerImage);
+      playerImage.invalidate();
+
+      PlayerDatas[ev.player.id] = {Name:ev.player.name, Main_Player:playerImage, moveX:0, moveY:0, imageD:0, sotuThen:false, destoroyed:false, imageOk:imageOk, imageNg:imageNg};
 
       playercntLabel.text = String(PlayerIds.length) + "人",
       playercntLabel.invalidate();
@@ -228,12 +239,12 @@ function main(param) {
       }
     });
 
-    let backLabel = new g.FilledRect({scene: scene,x: g.game.width, y: g.game.height, hidden:true,
+    let backLabel = new g.FilledRect({scene: scene,hidden:true,
       width: g.game.width, height: g.game.height, cssColor: "black", opacity: 1});
     scene.append(backLabel);
 
     let strLabel = new g.Label({scene: scene,x: g.game.width/2.4,y: 20,font: font,
-      text: "卒業",fontSize: 50, textColor: "black",opacity: 1,touchable: true ,hidden:true});
+      text: "卒業",fontSize: 50, textColor: "white",opacity: 1,touchable: true ,hidden:true});
     scene.append(strLabel);
     
     settingObj.forEach(Obj => {Obj.modified();});
@@ -242,6 +253,7 @@ function main(param) {
     sankaObj.forEach(Obj => {Obj.modified();});
     playercntObj.forEach(Obj => {Obj.modified();});
     background.invalidate();
+    backLabel.modified();
 
 
     /////////////////////
@@ -251,7 +263,6 @@ function main(param) {
       switch (ev.data.message){
         case "GameStart":
           timeLabel.text = String(gamesecond);
-          console.log(gamesecond);
           timeLabel.show();
           timeLabel.invalidate();
           startThen = true;
@@ -267,15 +278,6 @@ function main(param) {
           }
           gamesecondLabel.text = gamesecond + "秒";
           gamesecondLabel.invalidate();
-          break;
-
-        case "Player_Add":
-          let playerImage = new g.FrameSprite({scene: scene, src: scene.assets["NPC_botti"],
-            x: ev.data.x, y: ev.data.y, opacity: 1, local: false, hidden:true});
-          scene.append(playerImage);
-          playerImage.invalidate();
-
-          PlayerDatas[ev.data.Id] = {Name:ev.data.Name, Main_Player:playerImage, moveX:0, moveY:0, imageD:0, sotuThen:false, destoroyed:false};
           break;
 
         case "Player_Move":
@@ -316,13 +318,7 @@ function main(param) {
             }
             //プレイヤー画像更新
             PlayerDatas[Id].sotuThen = result;
-            if (result == true){
-              PlayerDatas[Id].Main_Player.src = scene.assets["NPC_OK"];
-            }
-            else{
-              PlayerDatas[Id].Main_Player.src = scene.assets["NPC_botti"];
-            }
-
+            PlayerDatas[Id].Main_Player.src = result ? PlayerDatas[Id].imageOk : PlayerDatas[Id].imageNg;
             PlayerDatas[Id].Main_Player.invalidate();
           });
 
@@ -378,76 +374,65 @@ function main(param) {
           PlayerIds.forEach(Id => {
             PlayerDatas[Id].Main_Player.hide();
 
-            let userLabel = new g.Label({
-              scene: scene, x: g.game.width/2.4, y: g.game.height, font: font, text: PlayerDatas[Id].Name, fontSize: 50, 
-              textColor: "black", opacity: 1,touchable: true, hidden:true});
-            scene.append(userLabel);
-
             if (PlayerDatas[Id].sotuThen == true){
-              userLabel.y += sotugyoY;
-              sotugyoY += 50;
-              sotugyolabels.push(userLabel);
+              sotugyolabels.push(user_add(scene,PlayerDatas[Id].Name,sotugyoY));
+              sotugyoY += 60;
             }
             else{
-              userLabel.y += taigakuY;
-              taigakuY += 50;
-              taigakulabels.push(userLabel);
+              taigakulabels.push(user_add(scene,PlayerDatas[Id].Name,taigakuY));
+              taigakuY += 60;
             }
-            userLabel.invalidate();
           });
 
+          console.log(sotugyolabels);
+          console.log(taigakulabels);
           backLabel.show();
           strLabel.show();
-          backLabel.modified();
           strLabel.invalidate();
         }
       }
 
+
       if (gameendThen == true){
+        //終了処理
+        let sotuNow = true;
+        let taiNow = false;
+        let endThen = false;
         if (sotugyolabels.length > 0){
-          let sotuNow = true;
-          while(sotuNow){
-            sotuNow = false;
-            let labelwait = 15 / sotugyolabels.length;
-            sotugyolabels.forEach(label =>{
-              if (label.y < g.game.height){
-                label.show();
-                sotuNow = true;
-              }
-              else if (label.y < 50){
-                label.hide();
-              }
-              label.y -= labelwait / 60;
-              label.invalidate();
-            });
+          if (sotuNow == true){
+            sotugyolabels = userList_show(sotugyolabels);
+            if (showEnd_Then(sotugyolabels) == true){
+              sotuNow = false;
+              taiNow = true;
+            }
           }
         }
+        else{
+          sotuNow = false;
+          taiNow = true;
+        }
 
-        strLabel.text = "退学";
-        strLabel.invalidate();
         if (taigakulabels.length > 0){
-          let taiNow = true;
-          while (taiNow){
-            taiNow = false;
-            let labelwait = 15 / taigakulabels.length;
-            taigakulabels.forEach(label =>{
-              if (label.y < g.game.height){
-                label.show();
-                taiNow = true;
-              }
-              else if (label.y < 50){
-                label.hide();
-              }
-              label.y -= labelwait / 60;
-              label.invalidate();
-              console.log(label.y);
-            });
+          if (taiNow == true){
+            strLabel.text = "退学";
+            strLabel.invalidate();
+            taigakulabels = userList_show(taigakulabels);
+            if (showEnd_Then(taigakulabels) == true){
+              taiNow = false;
+              endThen = true;
+            }
           }
-
+        }
+        else{
+          taiNow = false;
+          endThen = true;
         }
 
-        gameendThen = false;
-        sotugyoThen = true;
+        if (endThen == true){
+          console.log("end");
+          gameendThen = false;
+          sotugyoThen = true;
+        }
       }
     });
   });
@@ -465,3 +450,37 @@ function getrandom(min,max,exc){
   }
   return int
 };
+
+function user_add(scene,Nametxt,plusY){
+  let userLabel = new g.Label({
+    scene: scene, x: g.game.width/ 2.65, y: g.game.height + plusY, font: font, text: Nametxt, fontSize: 50, 
+    textColor: "white", opacity: 1,touchable: true, hidden:true});
+  scene.append(userLabel);
+  userLabel.invalidate();
+  return userLabel;
+}
+
+function userList_show(labels){
+  let labelwait = 15 / labels.length;
+  labels.forEach(label =>{
+    if (label.y < 70){
+      label.hide();
+    }
+    else if (label.y <= g.game.height){
+      label.show();
+    }
+    label.y -= labelwait;
+    label.invalidate();
+  });
+  return labels
+}
+
+function showEnd_Then(labels){
+  let result = true;
+  labels.forEach(label =>{
+    if (label.visible() == true){
+      result = false;
+    }
+  });
+  return result;
+}
