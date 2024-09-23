@@ -1,6 +1,7 @@
-let movecnt = 2;
-let gametime = 0;
 let y_limit = 80;
+let overlap_threshold = 25;
+let broadcasterPlayer = "";
+let broadcasterPlayerId = "";
 let resolvePlayerInfo = require("@akashic-extension/resolve-player-info");
 let tween_animation = require("@akashic-extension/akashic-timeline");
 let PlayerDatas = [{}];
@@ -14,7 +15,7 @@ let font = new g.DynamicFont({
 });
 
 function main(param) {
-  let assetIds = ["haikei","Main_botti","NPC_botti","Main_OK","NPC_OK"];
+  let assetIds = ["title","rule","haikei","Main_botti","NPC_botti","Main_OK","NPC_OK","sotugyo","taiho"];
   let scene = new g.Scene({ game: g.game ,assetIds: assetIds});
   let timeline = new tween_animation.Timeline(scene);
 
@@ -27,7 +28,7 @@ function main(param) {
 
 
   let gametime = 0;
-  let settingObj,settingstrs,sankaObj,startObj,playercntObj
+  let titleObj,settingObj,settingstrs,sankaObj,startObj,playercntObj
   let backlayer = new g.E({ scene: scene, parent: scene });   //背景
   let buttonlayer = new g.E({ scene: scene, parent: scene });   //ボタン
 
@@ -37,9 +38,10 @@ function main(param) {
     ////放送主判定////
     /////////////////
     g.game.onJoin.add(ev => {
-      let broadcasterPlayerId = ev.player.id; // 放送者のプレイヤーID
+      broadcasterPlayerId = ev.player.id; // 放送者のプレイヤーID
       // 自分が放送者なら、「締め切る」ボタンを表示。
       if (g.game.selfId === broadcasterPlayerId) {
+        broadcasterPlayer = ev.player.name;
         settingObj.forEach(Obj => {Obj.touchable = true;});
         //参加処理
         resolvePlayerInfo.resolvePlayerInfo({ raises: true });
@@ -54,6 +56,22 @@ function main(param) {
       startObj.forEach(Obj => {Obj.modified();});
       settingstrs.forEach(Obj => {Obj.invalidate();});
     });
+
+    
+    ///////////////////
+    ////タイトル画面////
+    ///////////////////
+    let background = new g.FrameSprite({scene: scene, src: scene.assets["haikei"], parent: backlayer,opacity: 0.5, touchable: false});
+
+    let title_Image = new g.FrameSprite({scene: scene, x: g.game.width*0.05, y: g.game.height * 0.02,
+       src: scene.assets["title"], parent: backlayer,opacity: 1, touchable: false});
+    scene.append(title_Image);
+
+    let rule_Image = new g.FrameSprite({scene: scene, x: g.game.width * 0.24, y: g.game.height * 0.65,
+      src: scene.assets["rule"], parent: backlayer,opacity: 1, touchable: false});
+    scene.append(rule_Image);
+
+   titleObj = [title_Image,rule_Image];
 
 
     /////////////////
@@ -90,7 +108,7 @@ function main(param) {
 
       PlayerIds.push(ev.player.id);
       let playerImage = new g.FrameSprite({scene: scene, src: imageNg,
-        x: getrandom(20,1260,-1), y: getrandom(y_limit,700,-1), opacity: 1, local: false, hidden:true});
+        x: getrandom(20,1250,-1), y: getrandom(y_limit,680,-1), opacity: 1, local: false, hidden:true});
       scene.append(playerImage);
       playerImage.invalidate();
 
@@ -144,22 +162,22 @@ function main(param) {
     ///////////////////
     ////制限時間設定////
     ///////////////////
-    let gamesecondBack = new g.FilledRect({scene: scene,x: g.game.width*0.05, y: g.game.height/5,
-      width: 760, height: 300, cssColor: "black", opacity: 0.5, parent:backlayer,touchable:false, local:false});
-    scene.append(gamesecondBack);
-
     //秒ラベル
     let gamesecondLabel = new g.Label({
       scene: scene, x: g.game.width*0.28, y: g.game.height/2.65, font: font, text: gamesecond + "秒",
       fontSize: 75, textColor: "black", touchable: false,opacity: 1,local: false
     });
     scene.append(gamesecondLabel);
-
     let gamesecondHedder = new g.Label({
       scene: scene, x: g.game.width*0.26, y: g.game.height/4, font: font, text: "制限時間",
       fontSize: 50, textColor: "black", touchable: false,opacity: 1,local: false
     });
     scene.append(gamesecondHedder);
+
+    //制限時間設定用背景
+    let gamesecondBack = new g.FilledRect({scene: scene,x: g.game.width*0.05, y: g.game.height/5,
+      width: 760, height: 300, cssColor: "black", opacity: 0.5, parent:backlayer,touchable:false, local:false});
+    scene.append(gamesecondBack);
 
     // 残り時間表示用ラベル
     let timeLabel = new g.Label({
@@ -168,7 +186,8 @@ function main(param) {
     });
     scene.append(timeLabel);
 
-    //秒ボタン(プラス)
+    //秒ボタン
+    //+1
     let oneplusBack = new g.FilledRect({scene: scene,x: g.game.width*0.55, y: g.game.height/2.5,
       width: 100, height: 60, cssColor: "black", opacity: 0.3, parent:buttonlayer,local: false});
     scene.append(oneplusBack);
@@ -181,21 +200,20 @@ function main(param) {
     });
     scene.append(oneplusButton);
 
+    //+10
     let tenplusBack = new g.FilledRect({scene: scene,x: g.game.width*0.44, y: g.game.height/2.5,
       width: 120, height: 60, cssColor: "black", opacity: 0.3, parent:buttonlayer,local: false});
     scene.append(tenplusBack);
     tenplusBack.onPointDown.add(() => {
       g.game.raiseEvent(new g.MessageEvent({ message: "secondUpdate", PulsSecond: 10}));
-    });
-    
+    });  
     let tenplusButton = new g.Label({
       scene: scene, x: g.game.width*0.445, y: g.game.height/2.5, font: font, text: "+10",
       fontSize: 50, textColor: "black", touchable: false,opacity: 1, parent:buttonlayer,local: false
     });
     scene.append(tenplusButton);
 
-
-    //秒ボタン(マイナス)
+    //-1
     let onepullBack = new g.FilledRect({scene: scene,x: g.game.width*0.07, y: g.game.height/2.5,
       width: 95, height: 60, cssColor: "black", opacity: 0.3, parent:buttonlayer,local: false});
     scene.append(onepullBack);
@@ -208,6 +226,7 @@ function main(param) {
     });
     scene.append(onepullButton);
 
+    //-10
     let tenpullBack = new g.FilledRect({scene: scene,x: g.game.width*0.16, y: g.game.height/2.5,
       width: 110, height: 60, cssColor: "black", opacity: 0.3, parent:buttonlayer,touchable:true,local: false});
     scene.append(tenpullBack);
@@ -220,25 +239,48 @@ function main(param) {
     });
     scene.append(tenpullButton);
 
+    //一括処理したいので配列に放り込む
     settingObj = [startBack,oneplusBack,onepullBack,tenplusBack,tenpullBack,gamesecondBack,gamesecondHedder];
     settingstrs = [startButton,oneplusButton,onepullButton,tenplusButton,tenpullButton,gamesecondLabel]
 
-    ////////////////////////////
-    ////背景画像・クリック処理////
-    ////////////////////////////
-    let background = new g.FrameSprite({scene: scene, src: scene.assets["haikei"], parent: backlayer,opacity: 0.5, touchable: false});
 
+    ///////////////////
+    ////クリック処理////
+    ///////////////////
     scene.onPointDownCapture.add((ev) =>{
       if (gameNowThen == true){
+        //クリックした位置に移動
         if (PlayerIds.indexOf(ev.player.id) != -1){  
+          //枠外飛び出し防止処理
           let NextX = ev.point.x - 22.5;
+          if (NextX < 1){
+            NextX = 1;
+          }
+          else if (NextX > 1240){
+            NextX = 1240;
+          }
+
           let NextY = ev.point.y - 29.5;
+          if (NextY < y_limit){
+            NextY = y_limit;
+          }
+          else if (NextY > 670){
+            NextY = 670;
+          }
+
+          //斜辺を求める(速度を一定にしたいので)
           let imageD = Math.abs(Math.sqrt(Math.pow(Math.abs(PlayerDatas[ev.player.id].Main_Player.x - NextX),2) + Math.pow(Math.abs(PlayerDatas[ev.player.id].Main_Player.y - NextY),2)));
+
+          //移動処理
           timeline.create(PlayerDatas[ev.player.id].Main_Player).moveTo(NextX, NextY, imageD * 5);
         }
       }
     });
 
+
+    /////////////////////////
+    ////卒業(退学)リスト用////
+    /////////////////////////
     let backLabel = new g.FilledRect({scene: scene,hidden:true,
       width: g.game.width, height: g.game.height, cssColor: "black", opacity: 1});
     scene.append(backLabel);
@@ -247,6 +289,11 @@ function main(param) {
       text: "卒業",fontSize: 50, textColor: "white",opacity: 1,touchable: true ,hidden:true});
     scene.append(strLabel);
     
+
+    ////////////////////////////
+    ////オブジェクト初期化処理////
+    ////////////////////////////
+    titleObj.forEach(Obj => {Obj.modified();});
     settingObj.forEach(Obj => {Obj.modified();});
     settingstrs.forEach(Obj => {Obj.modified();});
     startObj.forEach(Obj => {Obj.modified();});
@@ -280,40 +327,48 @@ function main(param) {
           gamesecondLabel.invalidate();
           break;
 
-        case "Player_Move":
+        case "Sotugyo_Hantei":
           PlayerIds.forEach(Id => {
             //卒業判定
             let result = false;
             let zyuhukuIds = []
+            //重複しているキャラを探索
             PlayerIds.forEach(Id2 => {
               if (Id != Id2){
                 let x1 = PlayerDatas[Id].Main_Player.x;
                 let x2 = PlayerDatas[Id2].Main_Player.x;
                 let y1 = PlayerDatas[Id].Main_Player.y;
                 let y2 = PlayerDatas[Id2].Main_Player.y;
-                if (Math.abs(x1 - x2) < 22.5 && Math.abs(y1 - y2) < 22.5){
+                if (Math.abs(x1 - x2) < overlap_threshold && Math.abs(y1 - y2) < overlap_threshold){
                   zyuhukuIds.push(Id2);
                 }
               }
             });
+
             if (zyuhukuIds == []){
+              //重複無し(ぼっち)なら退学
               result = false;
             }
             else if (zyuhukuIds.length == 1){
+              //重複が一人なら一旦卒業扱い
               result = true;
+
+              //ペア側の重複キャラを探索
               PlayerIds.forEach(Id2 => {
                 if (zyuhukuIds[0] != Id && zyuhukuIds[0] != Id2 && Id != Id2){
                   let x1 = PlayerDatas[zyuhukuIds[0]].Main_Player.x;
                   let x2 = PlayerDatas[Id2].Main_Player.x;
                   let y1 = PlayerDatas[zyuhukuIds[0]].Main_Player.y;
                   let y2 = PlayerDatas[Id2].Main_Player.y;
-                  if (Math.abs(x1 - x2) < 22.5 && Math.abs(y1 - y2) < 22.5){
+                  if (Math.abs(x1 - x2) < overlap_threshold && Math.abs(y1 - y2) < overlap_threshold){
+                    //ペア側に別の重複キャラがいるなら２人組では無いので退学
                     result = false;
                   }
                 }
               });
             }
             else{
+              //重複が２人以上なら２人組では無いので退学
               result = false;
             }
             //プレイヤー画像更新
@@ -332,15 +387,15 @@ function main(param) {
     ////ゲーム動作////
     /////////////////
     scene.onUpdate.add(() => {
-      gametime += 0.5 / g.game.fps; 
-
       if (startThen == true){
         //開始処理
-        settingObj.forEach(Obj => {Obj.touchable = false; Obj.hide(); Obj.modified();});
-        settingstrs.forEach(Obj => {Obj.touchable = false; Obj.hide(); Obj.modified();});
-        startObj.forEach(Obj => {Obj.touchable = false; Obj.hide(); Obj.modified();});
-        sankaObj.forEach(Obj => {Obj.touchable = false; Obj.hide(); Obj.modified();});
-        playercntObj.forEach(Obj => {Obj.touchable = false; Obj.hide(); Obj.modified();});
+        titleObj.forEach(Obj => {Obj.touchable = false; Obj.hide();});
+        settingObj.forEach(Obj => {Obj.touchable = false; Obj.hide();});
+        settingstrs.forEach(Obj => {Obj.touchable = false; Obj.hide();});
+        startObj.forEach(Obj => {Obj.touchable = false; Obj.hide();});
+        sankaObj.forEach(Obj => {Obj.touchable = false; Obj.hide();});
+        playercntObj.forEach(Obj => {Obj.touchable = false; Obj.hide();});
+        title_Image.hide();
         
         background.opacity = 1;
         background.invalidate();
@@ -356,11 +411,10 @@ function main(param) {
 
       if (gameNowThen == true){
         //ゲームメイン処理
-        //移動処理
+        gametime += 1 / g.game.fps; 
         if ((gamesecond - gametime) > 0){
-          g.game.raiseEvent(new g.MessageEvent({ message: "Player_Move"}));
-          gametime += 1 / g.game.fps; 
-          timeLabel.text = String((Math.floor((gamesecond - gametime) * 10) / 10));
+          g.game.raiseEvent(new g.MessageEvent({ message: "Sotugyo_Hantei"}));
+          timeLabel.text = String((Math.ceil(gamesecond - gametime)));
           timeLabel.invalidate();
         }
         else{
@@ -384,8 +438,6 @@ function main(param) {
             }
           });
 
-          console.log(sotugyolabels);
-          console.log(taigakulabels);
           backLabel.show();
           strLabel.show();
           strLabel.invalidate();
@@ -423,16 +475,61 @@ function main(param) {
             }
           }
         }
-        else{
+        else if (sotuNow == false){
           taiNow = false;
           endThen = true;
         }
-
+        
         if (endThen == true){
-          console.log("end");
           gameendThen = false;
+          strLabel.hide();
+          backLabel.hide();
           sotugyoThen = true;
         }
+      }
+
+
+      if (sotugyoThen == true){
+        //最終処理
+        let sotugyo_Obj = [];
+        if (PlayerDatas[broadcasterPlayerId].sotuThen == true){
+          let sotugyo_Image = new g.FrameSprite({scene: scene, src: scene.assets["sotugyo"], parent: backlayer,opacity: 1, touchable: false});
+          sotugyo_Obj.push(sotugyo_Image);
+        }
+        else{
+          //放送主が退学時
+          let newsX = g.game.width * 0.1;
+          //容疑者
+          let suspect_Label = new g.FilledRect({scene: scene,width: 800, height: 70,
+             cssColor: "red", opacity: 7, x: newsX, y: g.game.height - 210});
+          sotugyo_Obj.push(suspect_Label);
+          let suspect_text = new g.Label({
+            scene: scene, x: newsX, y: g.game.height - 210, font: font, text: " " + broadcasterPlayer + "容疑者(12)", fontSize: 50, 
+            textColor: "white", opacity: 1,touchable: false});
+          sotugyo_Obj.push(suspect_text);
+  
+          //ニュース本文
+          let Main_Label = new g.FilledRect({scene: scene, width: 1000, height: 125,
+             cssColor: "black", opacity: 0.5, x: newsX, y: g.game.height - 140});
+          sotugyo_Obj.push(Main_Label);
+          let Main_text1 = new g.Label({
+            scene: scene, x: newsX, y: g.game.height - 140, font: font, text: "「２人組が作れないから退学させられた」", fontSize: 50, 
+            textColor: "white", opacity: 1,touchable: false});
+          sotugyo_Obj.push(Main_text1);
+          let Main_text2 = new g.Label({
+            scene: scene, x: newsX, y: g.game.height - 80, font: font, text: " などと訳の分からない供述を続けている", fontSize: 50, 
+            textColor: "white", opacity: 1,touchable: false});
+          sotugyo_Obj.push(Main_text2);
+
+          //ニュースヘッダー画像
+          let heddar_Image = new g.FrameSprite({scene: scene, src: scene.assets["taiho"], parent: 
+            backlayer,opacity: 1, touchable: false, x: g.game.width * 0.7, y: g.game.height * 0.01});
+          sotugyo_Obj.push(heddar_Image);
+        }
+
+        //オブジェクト生成
+        sotugyo_Obj.forEach(Obj => {scene.append(Obj); Obj.modified();});
+        sotugyoThen = false;
       }
     });
   });
@@ -443,6 +540,8 @@ function main(param) {
 
 module.exports = main;
 
+
+//乱数生成機
 function getrandom(min,max,exc){
   let int = g.game.random.get(min, max);
   while(exc != -1 && exc == int){
@@ -451,14 +550,29 @@ function getrandom(min,max,exc){
   return int
 };
 
+
+//卒業(退学)リスト作成用
 function user_add(scene,Nametxt,plusY){
   let userLabel = new g.Label({
-    scene: scene, x: g.game.width/ 2.65, y: g.game.height + plusY, font: font, text: Nametxt, fontSize: 50, 
-    textColor: "white", opacity: 1,touchable: true, hidden:true});
+    scene: scene, x: (g.game.width * 0.1) + ((33 - Nametxt.bytes()) * 0.5 * 29), y: g.game.height + plusY, font: font, text: Nametxt, fontSize: 50, 
+    textColor: "white", opacity: 1,touchable: false, hidden:true});
   scene.append(userLabel);
   userLabel.invalidate();
   return userLabel;
 }
+
+String.prototype.bytes = function () {
+  var length = 0;
+  for (var i = 0; i < this.length; i++) {
+    var c = this.charCodeAt(i);
+    if ((c >= 0x0 && c < 0x81) || (c === 0xf8f0) || (c >= 0xff61 && c < 0xffa0) || (c >= 0xf8f1 && c < 0xf8f4)) {
+      length += 1;
+    } else {
+      length += 2;
+    }
+  }
+  return length;
+};
 
 function userList_show(labels){
   let labelwait = 15 / labels.length;

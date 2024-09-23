@@ -9,6 +9,18 @@
 			"path": "script/main.js",
 			"global": true
 		},
+		"title": {
+			"type": "image",
+			"width": 1172,
+			"height": 144,
+			"path": "image/title.png"
+		},
+		"rule": {
+			"type": "image",
+			"width": 265,
+			"height": 162,
+			"path": "image/rule.png"
+		},
 		"haikei": {
 			"type": "image",
 			"width": 1280,
@@ -38,6 +50,18 @@
 			"width": 45,
 			"height": 59,
 			"path": "image/NPC_OK.png"
+		},
+		"sotugyo": {
+			"type": "image",
+			"width": 1280,
+			"height": 720,
+			"path": "image/sotugyo.png"
+		},
+		"taiho": {
+			"type": "image",
+			"width": 390,
+			"height": 220,
+			"path": "image/taiho.png"
 		}
 	},
 	"environment": {
