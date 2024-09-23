@@ -15,7 +15,7 @@ let font = new g.DynamicFont({
 });
 
 function main(param) {
-  let assetIds = ["title","rule","haikei","Main_botti","NPC_botti","Main_OK","NPC_OK","sotugyo","taiho"];
+  let assetIds = ["title","rule","haikei","bgm1","Main_botti","NPC_botti","Nushi_botti","Main_OK","NPC_OK","Nushi_OK","bgm2","sotugyo","taiho"];
   let scene = new g.Scene({ game: g.game ,assetIds: assetIds});
   let timeline = new tween_animation.Timeline(scene);
 
@@ -25,14 +25,17 @@ function main(param) {
   let sotugyoThen = false;
   let gamesecond = 15;
 
-
-
   let gametime = 0;
   let titleObj,settingObj,settingstrs,sankaObj,startObj,playercntObj
+  let bgm1,bgm2
   let backlayer = new g.E({ scene: scene, parent: scene });   //背景
   let buttonlayer = new g.E({ scene: scene, parent: scene });   //ボタン
 
   scene.onLoad.add(() => {
+
+    //BGMは参加の有無に関係なく全員に流す
+    bgm1 = scene.asset.getAudio("/audio/suspense_piano").play();
+    bgm1.changeVolume(0.1);
 
     /////////////////
     ////放送主判定////
@@ -101,10 +104,11 @@ function main(param) {
       // (ev.player.id には (最初から) プレイヤーIDが含まれています)
 
       const isLocalPlayer = ev.player.id === g.game.selfId;
+      const Nushi_Then = ev.player.id === broadcasterPlayerId;
 
       // プレイヤー画像
-      const imageOk = scene.assets[isLocalPlayer ? "Main_OK" : "NPC_OK"];
-      const imageNg = scene.assets[isLocalPlayer ? "Main_botti" : "NPC_botti"];
+      const imageOk = scene.assets[isLocalPlayer ? "Main_OK" : Nushi_Then ? "Nushi_OK" : "NPC_OK"];
+      const imageNg = scene.assets[isLocalPlayer ? "Main_botti" : Nushi_Then ? "Nushi_botti" : "NPC_botti"];
 
       PlayerIds.push(ev.player.id);
       let playerImage = new g.FrameSprite({scene: scene, src: imageNg,
@@ -123,6 +127,10 @@ function main(param) {
     ////////////////////////////
     ////プレイヤー人数カウント////
     ////////////////////////////
+    let playercntBack = new g.FilledRect({scene: scene,x: g.game.width*0.73, y: g.game.height/5,
+      width: 300, height: 300, cssColor: "gray", opacity: 0.5, parent:backlayer,touchable:false});
+    scene.append(playercntBack);
+
     let playercntLabel = new g.Label({
       scene: scene, x: g.game.width*0.8, y: g.game.height/2.65, font: font, text: 1 + "人",
       fontSize: 75, textColor: "black", touchable: false,opacity: 1,local: false
@@ -135,10 +143,6 @@ function main(param) {
     });
     scene.append(playercntHedder);
 
-    let playercntBack = new g.FilledRect({scene: scene,x: g.game.width*0.73, y: g.game.height/5,
-      width: 300, height: 300, cssColor: "black", opacity: 0.5, parent:backlayer,touchable:false});
-    scene.append(playercntBack);
-
     playercntObj = [playercntBack,playercntHedder,playercntLabel]
 
 
@@ -146,7 +150,7 @@ function main(param) {
     ////開始ボタン////
     /////////////////
     let startBack = new g.FilledRect({scene: scene,x: g.game.width*0.1 -10, y: g.game.height * 0.9,
-      width: 215, height: 60, cssColor: "black", opacity: 0.3, touchable: false, local: true});
+      width: 215, height: 60, cssColor: "gray", opacity: 0.3, touchable: false, local: true});
     scene.append(startBack);
     let startButton = new g.Label({
       scene: scene, x: g.game.width*0.1, y: g.game.height * 0.9, font: font, text: "締め切る",
@@ -162,21 +166,9 @@ function main(param) {
     ///////////////////
     ////制限時間設定////
     ///////////////////
-    //秒ラベル
-    let gamesecondLabel = new g.Label({
-      scene: scene, x: g.game.width*0.28, y: g.game.height/2.65, font: font, text: gamesecond + "秒",
-      fontSize: 75, textColor: "black", touchable: false,opacity: 1,local: false
-    });
-    scene.append(gamesecondLabel);
-    let gamesecondHedder = new g.Label({
-      scene: scene, x: g.game.width*0.26, y: g.game.height/4, font: font, text: "制限時間",
-      fontSize: 50, textColor: "black", touchable: false,opacity: 1,local: false
-    });
-    scene.append(gamesecondHedder);
-
     //制限時間設定用背景
     let gamesecondBack = new g.FilledRect({scene: scene,x: g.game.width*0.05, y: g.game.height/5,
-      width: 760, height: 300, cssColor: "black", opacity: 0.5, parent:backlayer,touchable:false, local:false});
+      width: 760, height: 300, cssColor: "gray", opacity: 0.5, parent:backlayer,touchable:false, local:false});
     scene.append(gamesecondBack);
 
     // 残り時間表示用ラベル
@@ -188,56 +180,68 @@ function main(param) {
 
     //秒ボタン
     //+1
-    let oneplusBack = new g.FilledRect({scene: scene,x: g.game.width*0.55, y: g.game.height/2.5,
+    let oneplusBack = new g.FilledRect({scene: scene,x: g.game.width * 0.55, y: g.game.height / 2.5,
       width: 100, height: 60, cssColor: "black", opacity: 0.3, parent:buttonlayer,local: false});
     scene.append(oneplusBack);
     oneplusBack.onPointDown.add(() => {
       g.game.raiseEvent(new g.MessageEvent({ message: "secondUpdate", PulsSecond: 1}));
     });
     let oneplusButton = new g.Label({
-      scene: scene, x: g.game.width*0.56, y: g.game.height/2.5, font: font, text: "+１",
+      scene: scene, x: g.game.width * 0.56, y: g.game.height / 2.5, font: font, text: "+１",
       fontSize: 50, textColor: "black", touchable: false,opacity: 1, parent:buttonlayer,local: false
     });
     scene.append(oneplusButton);
 
     //+10
-    let tenplusBack = new g.FilledRect({scene: scene,x: g.game.width*0.44, y: g.game.height/2.5,
+    let tenplusBack = new g.FilledRect({scene: scene,x: g.game.width * 0.44, y: g.game.height/2.5,
       width: 120, height: 60, cssColor: "black", opacity: 0.3, parent:buttonlayer,local: false});
     scene.append(tenplusBack);
     tenplusBack.onPointDown.add(() => {
       g.game.raiseEvent(new g.MessageEvent({ message: "secondUpdate", PulsSecond: 10}));
     });  
     let tenplusButton = new g.Label({
-      scene: scene, x: g.game.width*0.445, y: g.game.height/2.5, font: font, text: "+10",
+      scene: scene, x: g.game.width * 0.445, y: g.game.height / 2.5, font: font, text: "+10",
       fontSize: 50, textColor: "black", touchable: false,opacity: 1, parent:buttonlayer,local: false
     });
     scene.append(tenplusButton);
 
     //-1
-    let onepullBack = new g.FilledRect({scene: scene,x: g.game.width*0.07, y: g.game.height/2.5,
+    let onepullBack = new g.FilledRect({scene: scene,x: g.game.width * 0.07, y: g.game.height / 2.5,
       width: 95, height: 60, cssColor: "black", opacity: 0.3, parent:buttonlayer,local: false});
     scene.append(onepullBack);
     onepullBack.onPointDown.add(() => {
       g.game.raiseEvent(new g.MessageEvent({ message: "secondUpdate", PulsSecond: -1}));
     });
     let onepullButton = new g.Label({
-      scene: scene, x: g.game.width*0.085, y: g.game.height/2.5, font: font, text: "-１",
+      scene: scene, x: g.game.width * 0.085, y: g.game.height / 2.5, font: font, text: "-１",
       fontSize: 50, textColor: "black", touchable: false,opacity: 1, parent:buttonlayer,local: false
     });
     scene.append(onepullButton);
 
     //-10
-    let tenpullBack = new g.FilledRect({scene: scene,x: g.game.width*0.16, y: g.game.height/2.5,
+    let tenpullBack = new g.FilledRect({scene: scene,x: g.game.width * 0.16, y: g.game.height / 2.5,
       width: 110, height: 60, cssColor: "black", opacity: 0.3, parent:buttonlayer,touchable:true,local: false});
     scene.append(tenpullBack);
     tenpullBack.onPointDown.add(() => {
       g.game.raiseEvent(new g.MessageEvent({ message: "secondUpdate", PulsSecond: -10}));
     });
     let tenpullButton = new g.Label({
-      scene: scene, x: g.game.width*0.17, y: g.game.height/2.5, font: font, text: "-10",
+      scene: scene, x: g.game.width * 0.17, y: g.game.height / 2.5, font: font, text: "-10",
       fontSize: 50, textColor: "black", touchable: false,opacity: 1, parent:buttonlayer,local: false
     });
     scene.append(tenpullButton);
+
+    //秒ラベル
+    let gamesecondLabel = new g.Label({
+      scene: scene, x: g.game.width * 0.28, y: g.game.height/2.65, font: font, text: gamesecond + "秒",
+      fontSize: 75, textColor: "black", touchable: false,opacity: 1,local: false
+    });
+    scene.append(gamesecondLabel);
+    let gamesecondHedder = new g.Label({
+      scene: scene, x: g.game.width * 0.26, y: g.game.height/4, font: font, text: "制限時間",
+      fontSize: 50, textColor: "black", touchable: false,opacity: 1,local: false
+    });
+    scene.append(gamesecondHedder);
 
     //一括処理したいので配列に放り込む
     settingObj = [startBack,oneplusBack,onepullBack,tenplusBack,tenpullBack,gamesecondBack,gamesecondHedder];
@@ -285,7 +289,7 @@ function main(param) {
       width: g.game.width, height: g.game.height, cssColor: "black", opacity: 1});
     scene.append(backLabel);
 
-    let strLabel = new g.Label({scene: scene,x: g.game.width/2.4,y: 20,font: font,
+    let strLabel = new g.Label({scene: scene,x: g.game.width / 2.4,y: 20,font: font,
       text: "卒業",fontSize: 50, textColor: "white",opacity: 1,touchable: true ,hidden:true});
     scene.append(strLabel);
     
@@ -316,6 +320,7 @@ function main(param) {
           break;
 
         case "secondUpdate":
+          //制限時間設定を全体に反映
           gamesecond += ev.data.PulsSecond;
           if (gamesecond < 1){
             gamesecond = 1;
@@ -389,6 +394,7 @@ function main(param) {
     scene.onUpdate.add(() => {
       if (startThen == true){
         //開始処理
+        //タイトル・設定項目削除
         titleObj.forEach(Obj => {Obj.touchable = false; Obj.hide();});
         settingObj.forEach(Obj => {Obj.touchable = false; Obj.hide();});
         settingstrs.forEach(Obj => {Obj.touchable = false; Obj.hide();});
@@ -397,10 +403,11 @@ function main(param) {
         playercntObj.forEach(Obj => {Obj.touchable = false; Obj.hide();});
         title_Image.hide();
         
+        //半透明にしていた背景を非透明化
         background.opacity = 1;
         background.invalidate();
 
-
+        //プレイヤーオブジェクト生成
         PlayerIds.forEach(Id => {
           PlayerDatas[Id].Main_Player.invalidate();
           PlayerDatas[Id].Main_Player.show();
@@ -409,25 +416,35 @@ function main(param) {
         gameNowThen = true;
       }
 
+
       if (gameNowThen == true){
         //ゲームメイン処理
         gametime += 1 / g.game.fps; 
         if ((gamesecond - gametime) > 0){
+          //卒業判定
           g.game.raiseEvent(new g.MessageEvent({ message: "Sotugyo_Hantei"}));
           timeLabel.text = String((Math.ceil(gamesecond - gametime)));
           timeLabel.invalidate();
         }
         else{
+          //タイムアップ(gametimeが０以下になれば)したらこちらに遷移
           gameNowThen = false;
           gameendThen = true;
 
+          //bgm停止
+          bgm1.stop();
+
+          //背景・タイマー削除
           background.hide();
           timeLabel.hide();
+
           let sotugyoY = 0;
           let taigakuY = 0;
           PlayerIds.forEach(Id => {
+            //プレイヤーオブジェクト削除
             PlayerDatas[Id].Main_Player.hide();
 
+            //卒業・退学リスト作成
             if (PlayerDatas[Id].sotuThen == true){
               sotugyolabels.push(user_add(scene,PlayerDatas[Id].Name,sotugyoY));
               sotugyoY += 60;
@@ -438,18 +455,24 @@ function main(param) {
             }
           });
 
+          //卒業・退学リスト用背景・ヘッダー生成
           backLabel.show();
           strLabel.show();
           strLabel.invalidate();
+
+          //卒業用のBGMを流す
+          bgm2 = scene.asset.getAudio("/audio/hotaru_piano_5").play().changeVolume(0.1);
         }
       }
 
 
       if (gameendThen == true){
-        //終了処理
+        //卒業・退学一覧処理
         let sotuNow = true;
         let taiNow = false;
         let endThen = false;
+
+        //卒業
         if (sotugyolabels.length > 0){
           if (sotuNow == true){
             sotugyolabels = userList_show(sotugyolabels);
@@ -464,6 +487,7 @@ function main(param) {
           taiNow = true;
         }
 
+        //退学
         if (taigakulabels.length > 0){
           if (taiNow == true){
             strLabel.text = "退学";
@@ -480,6 +504,7 @@ function main(param) {
           endThen = true;
         }
         
+        //最終処理に遷移(オブジェクト削除)
         if (endThen == true){
           gameendThen = false;
           strLabel.hide();
@@ -493,6 +518,7 @@ function main(param) {
         //最終処理
         let sotugyo_Obj = [];
         if (PlayerDatas[broadcasterPlayerId].sotuThen == true){
+          //放送主が卒業時
           let sotugyo_Image = new g.FrameSprite({scene: scene, src: scene.assets["sotugyo"], parent: backlayer,opacity: 1, touchable: false});
           sotugyo_Obj.push(sotugyo_Image);
         }
@@ -504,7 +530,7 @@ function main(param) {
              cssColor: "red", opacity: 7, x: newsX, y: g.game.height - 210});
           sotugyo_Obj.push(suspect_Label);
           let suspect_text = new g.Label({
-            scene: scene, x: newsX, y: g.game.height - 210, font: font, text: " " + broadcasterPlayer + "容疑者(12)", fontSize: 50, 
+            scene: scene, x: newsX, y: g.game.height - 210, font: font, text: " " + PlayerDatas[broadcasterPlayerId].Name + "容疑者(12)", fontSize: 50, 
             textColor: "white", opacity: 1,touchable: false});
           sotugyo_Obj.push(suspect_text);
   

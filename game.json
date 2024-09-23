@@ -27,6 +27,12 @@
 			"height": 720,
 			"path": "image/haikei.png"
 		},
+		"bgm1": {
+			"type": "audio",
+			"path": "audio/suspense_piano",
+			"systemId": "music",
+			"duration": 2000
+		},
 		"Main_botti": {
 			"type": "image",
 			"width": 45,
@@ -39,6 +45,12 @@
 			"height": 59,
 			"path": "image/NPC_botti.png"
 		},
+		"Nushi_botti": {
+			"type": "image",
+			"width": 45,
+			"height": 59,
+			"path": "image/Nushi_botti.png"
+		},
 		"Main_OK": {
 			"type": "image",
 			"width": 45,
@@ -50,6 +62,18 @@
 			"width": 45,
 			"height": 59,
 			"path": "image/NPC_OK.png"
+		},
+		"Nushi_OK": {
+			"type": "image",
+			"width": 45,
+			"height": 59,
+			"path": "image/Nushi_OK.png"
+		},
+		"bgm2": {
+			"type": "audio",
+			"path": "audio/hotaru_piano_5",
+			"systemId": "music",
+			"duration": 2000
 		},
 		"sotugyo": {
 			"type": "image",
@@ -71,7 +95,7 @@
 				"multi_admission"
 			],
 			"preferredSessionParameters": {
-				"totalTimeLimit": 75
+				"totalTimeLimit": 80
 			}
 		},
 		"external": {
