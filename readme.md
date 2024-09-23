@@ -10,7 +10,7 @@ https://commons.nicovideo.jp/works/lg577
 使用素材
 ・BGM
 https://mmt38.info/arrange/hotaru/
-https://commons.nicovideo.jp/material/nc106496
+https://commons.nicovideo.jp/material/nc170228
 
 ・プレイヤー画像、背景
 https://yms.main.jp/

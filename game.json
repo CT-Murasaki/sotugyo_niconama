@@ -29,7 +29,7 @@
 		},
 		"bgm1": {
 			"type": "audio",
-			"path": "audio/suspense_piano",
+			"path": "audio/huon",
 			"systemId": "music",
 			"duration": 2000
 		},

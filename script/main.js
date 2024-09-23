@@ -34,7 +34,7 @@ function main(param) {
   scene.onLoad.add(() => {
 
     //BGMは参加の有無に関係なく全員に流す
-    bgm1 = scene.asset.getAudio("/audio/suspense_piano").play();
+    bgm1 = scene.asset.getAudio("/audio/huon").play();
     bgm1.changeVolume(0.1);
 
     /////////////////
@@ -332,7 +332,46 @@ function main(param) {
           gamesecondLabel.invalidate();
           break;
 
-        case "Sotugyo_Hantei":
+        default:
+          break;
+      }
+    });
+
+
+    /////////////////
+    ////ゲーム動作////
+    /////////////////
+    scene.onUpdate.add(() => {
+      if (startThen == true){
+        //開始処理
+        //タイトル・設定項目削除
+        titleObj.forEach(Obj => {Obj.touchable = false; Obj.hide();});
+        settingObj.forEach(Obj => {Obj.touchable = false; Obj.hide();});
+        settingstrs.forEach(Obj => {Obj.touchable = false; Obj.hide();});
+        startObj.forEach(Obj => {Obj.touchable = false; Obj.hide();});
+        sankaObj.forEach(Obj => {Obj.touchable = false; Obj.hide();});
+        playercntObj.forEach(Obj => {Obj.touchable = false; Obj.hide();});
+        title_Image.hide();
+        
+        //半透明にしていた背景を非透明化
+        background.opacity = 1;
+        background.invalidate();
+
+        //プレイヤーオブジェクト生成
+        PlayerIds.forEach(Id => {
+          PlayerDatas[Id].Main_Player.invalidate();
+          PlayerDatas[Id].Main_Player.show();
+        });
+        startThen = false;
+        gameNowThen = true;
+      }
+
+
+      if (gameNowThen == true){
+        //ゲームメイン処理
+        gametime += 1 / g.game.fps; 
+        if ((gamesecond - gametime) > 0){
+          //卒業判定
           PlayerIds.forEach(Id => {
             //卒業判定
             let result = false;
@@ -376,53 +415,16 @@ function main(param) {
               //重複が２人以上なら２人組では無いので退学
               result = false;
             }
+
             //プレイヤー画像更新
-            PlayerDatas[Id].sotuThen = result;
-            PlayerDatas[Id].Main_Player.src = result ? PlayerDatas[Id].imageOk : PlayerDatas[Id].imageNg;
-            PlayerDatas[Id].Main_Player.invalidate();
+            if (PlayerDatas[Id].sotuThen != result){
+              PlayerDatas[Id].sotuThen = result;
+              PlayerDatas[Id].Main_Player.src = result ? PlayerDatas[Id].imageOk : PlayerDatas[Id].imageNg;
+              PlayerDatas[Id].Main_Player.invalidate();
+            }
           });
 
-        default:
-          break;
-      }
-    });
-
-
-    /////////////////
-    ////ゲーム動作////
-    /////////////////
-    scene.onUpdate.add(() => {
-      if (startThen == true){
-        //開始処理
-        //タイトル・設定項目削除
-        titleObj.forEach(Obj => {Obj.touchable = false; Obj.hide();});
-        settingObj.forEach(Obj => {Obj.touchable = false; Obj.hide();});
-        settingstrs.forEach(Obj => {Obj.touchable = false; Obj.hide();});
-        startObj.forEach(Obj => {Obj.touchable = false; Obj.hide();});
-        sankaObj.forEach(Obj => {Obj.touchable = false; Obj.hide();});
-        playercntObj.forEach(Obj => {Obj.touchable = false; Obj.hide();});
-        title_Image.hide();
-        
-        //半透明にしていた背景を非透明化
-        background.opacity = 1;
-        background.invalidate();
-
-        //プレイヤーオブジェクト生成
-        PlayerIds.forEach(Id => {
-          PlayerDatas[Id].Main_Player.invalidate();
-          PlayerDatas[Id].Main_Player.show();
-        });
-        startThen = false;
-        gameNowThen = true;
-      }
-
-
-      if (gameNowThen == true){
-        //ゲームメイン処理
-        gametime += 1 / g.game.fps; 
-        if ((gamesecond - gametime) > 0){
-          //卒業判定
-          g.game.raiseEvent(new g.MessageEvent({ message: "Sotugyo_Hantei"}));
+          //時間更新
           timeLabel.text = String((Math.ceil(gamesecond - gametime)));
           timeLabel.invalidate();
         }
