@@ -374,7 +374,6 @@ function main(param) {
             //卒業判定
             let result = false;
             let zyuhukuId = "";
-            let zyuhukuIds = []
             //重複しているキャラを探索
             for (let i = 0; i < PlayerIds.length; i++){
               let Id2 = PlayerIds[i];
