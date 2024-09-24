@@ -1,6 +1,5 @@
 let y_limit = 80;
 let overlap_threshold = 25;
-let broadcasterPlayer = "";
 let broadcasterPlayerId = "";
 let resolvePlayerInfo = require("@akashic-extension/resolve-player-info");
 let tween_animation = require("@akashic-extension/akashic-timeline");
@@ -44,7 +43,6 @@ function main(param) {
       broadcasterPlayerId = ev.player.id; // 放送者のプレイヤーID
       // 自分が放送者なら、「締め切る」ボタンを表示。
       if (g.game.selfId === broadcasterPlayerId) {
-        broadcasterPlayer = ev.player.name;
         settingObj.forEach(Obj => {Obj.touchable = true;});
         //参加処理
         resolvePlayerInfo.resolvePlayerInfo({ raises: true });
@@ -375,45 +373,53 @@ function main(param) {
           PlayerIds.forEach(Id => {
             //卒業判定
             let result = false;
+            let zyuhukuId = "";
             let zyuhukuIds = []
             //重複しているキャラを探索
-            PlayerIds.forEach(Id2 => {
+            for (let i = 0; i < PlayerIds.length; i++){
+              let Id2 = PlayerIds[i];
               if (Id != Id2){
                 let x1 = PlayerDatas[Id].Main_Player.x;
                 let x2 = PlayerDatas[Id2].Main_Player.x;
                 let y1 = PlayerDatas[Id].Main_Player.y;
                 let y2 = PlayerDatas[Id2].Main_Player.y;
                 if (Math.abs(x1 - x2) < overlap_threshold && Math.abs(y1 - y2) < overlap_threshold){
-                  zyuhukuIds.push(Id2);
+                  if (zyuhukuId == ""){
+                    //相手方のIdを記憶
+                    zyuhukuId = Id2;
+                  }
+                  else{
+                    //重複が２人以上なら２人組では無いので退学
+                    zyuhukuId = "";
+                    break;
+                  }
                 }
               }
-            });
+            }
 
-            if (zyuhukuIds == []){
-              //重複無し(ぼっち)なら退学
+            if (zyuhukuId == ""){
+              //重複無し(ぼっち) or 重複が２人以上なら退学
               result = false;
             }
-            else if (zyuhukuIds.length == 1){
+            else {
               //重複が一人なら一旦卒業扱い
               result = true;
 
               //ペア側の重複キャラを探索
-              PlayerIds.forEach(Id2 => {
-                if (zyuhukuIds[0] != Id && zyuhukuIds[0] != Id2 && Id != Id2){
-                  let x1 = PlayerDatas[zyuhukuIds[0]].Main_Player.x;
+              for (let i = 0; i < PlayerIds.length; i++){
+                let Id2 = PlayerIds[i];
+                if (zyuhukuId != Id && zyuhukuId != Id2 && Id != Id2){
+                  let x1 = PlayerDatas[zyuhukuId].Main_Player.x;
                   let x2 = PlayerDatas[Id2].Main_Player.x;
-                  let y1 = PlayerDatas[zyuhukuIds[0]].Main_Player.y;
+                  let y1 = PlayerDatas[zyuhukuId].Main_Player.y;
                   let y2 = PlayerDatas[Id2].Main_Player.y;
                   if (Math.abs(x1 - x2) < overlap_threshold && Math.abs(y1 - y2) < overlap_threshold){
                     //ペア側に別の重複キャラがいるなら２人組では無いので退学
                     result = false;
+                    break;
                   }
                 }
-              });
-            }
-            else{
-              //重複が２人以上なら２人組では無いので退学
-              result = false;
+              }
             }
 
             //プレイヤー画像更新
@@ -603,7 +609,7 @@ String.prototype.bytes = function () {
 };
 
 function userList_show(labels){
-  let labelwait = 15 / labels.length;
+  let labelwait = (labels.length / 5);
   labels.forEach(label =>{
     if (label.y < 70){
       label.hide();
