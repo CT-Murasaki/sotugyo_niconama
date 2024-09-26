@@ -274,7 +274,10 @@ function main(param) {
           let imageD = Math.abs(Math.sqrt(Math.pow(Math.abs(PlayerDatas[ev.player.id].Main_Player.x - NextX),2) + Math.pow(Math.abs(PlayerDatas[ev.player.id].Main_Player.y - NextY),2)));
 
           //移動処理
-          timeline.create(PlayerDatas[ev.player.id].Main_Player).moveTo(NextX, NextY, imageD * 5);
+          if(PlayerDatas[ev.player.id].moveTween){
+            PlayerDatas[ev.player.id].moveTween.cancel();
+          }
+          PlayerDatas[ev.player.id].moveTween = timeline.create(PlayerDatas[ev.player.id].Main_Player).moveTo(NextX, NextY, imageD * 5);
         }
       }
     });
