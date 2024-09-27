@@ -110,7 +110,7 @@ function main(param) {
 
       PlayerIds.push(ev.player.id);
       let playerImage = new g.FrameSprite({scene: scene, src: imageNg,
-        x: getrandom(20,1250,-1), y: getrandom(y_limit,680,-1), opacity: 1, local: false, hidden:true});
+        x: getrandom(22.5,1240,-1), y: getrandom(y_limit,670,-1), opacity: 1, local: false, hidden:true});
       scene.append(playerImage);
       playerImage.invalidate();
 
