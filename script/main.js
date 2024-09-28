@@ -438,40 +438,46 @@ function main(param) {
         }
         else{
           //タイムアップ(gametimeが０以下になれば)したらこちらに遷移
-          gameNowThen = false;
-          gameendThen = true;
-
-          //bgm停止
-          bgm1.stop();
-
-          //背景・タイマー削除
-          background.hide();
+          //タイマー削除
           timeLabel.hide();
 
-          let sotugyoY = 0;
-          let taigakuY = 0;
-          PlayerIds.forEach(Id => {
-            //プレイヤーオブジェクト削除
-            PlayerDatas[Id].Main_Player.hide();
+          gameNowThen = false;
 
-            //卒業・退学リスト作成
-            if (PlayerDatas[Id].sotuThen == true){
-              sotugyolabels.push(user_add(scene,PlayerDatas[Id].Name,sotugyoY));
-              sotugyoY += 60;
-            }
-            else{
-              taigakulabels.push(user_add(scene,PlayerDatas[Id].Name,taigakuY));
-              taigakuY += 60;
-            }
-          });
+          let Timeout = scene.setTimeout(function () {
+            // 5秒後に行う処理
+            let sotugyoY = 0;
+            let taigakuY = 0;
+            PlayerIds.forEach(Id => {
+              //プレイヤーオブジェクト削除
+              PlayerDatas[Id].Main_Player.hide();
+  
+              //卒業・退学リスト作成
+              if (PlayerDatas[Id].sotuThen == true){
+                sotugyolabels.push(user_add(scene,PlayerDatas[Id].Name,sotugyoY));
+                sotugyoY += 70;
+              }
+              else{
+                taigakulabels.push(user_add(scene,PlayerDatas[Id].Name,taigakuY));
+                taigakuY += 70;
+              }
+            });
 
-          //卒業・退学リスト用背景・ヘッダー生成
-          backLabel.show();
-          strLabel.show();
-          strLabel.invalidate();
+            //bgm停止
+            bgm1.stop();
 
-          //卒業用のBGMを流す
-          bgm2 = scene.asset.getAudio("/audio/hotaru_piano_5").play().changeVolume(0.1);
+            //背景削除
+            background.hide();
+
+            //卒業・退学リスト用背景・ヘッダー生成
+            backLabel.show();
+            strLabel.show();
+            strLabel.invalidate();
+
+            //卒業用のBGMを流す
+            bgm2 = scene.asset.getAudio("/audio/hotaru_piano_5").play().changeVolume(0.1);
+
+            gameendThen = true;
+          }, 5000);
         }
       }
 
@@ -611,7 +617,7 @@ String.prototype.bytes = function () {
 };
 
 function userList_show(labels){
-  let labelwait = (labels.length / 5);
+  let labelwait = 2.5;
   labels.forEach(label =>{
     if (label.y < 70){
       label.hide();
