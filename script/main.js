@@ -333,6 +333,146 @@ function main(param) {
           gamesecondLabel.invalidate();
           break;
 
+        case "delayAdd":
+          //タイムアップ(gametimeが０以下になれば)したらこちらに遷移
+          //タイマー削除
+          timeLabel.hide();
+
+          gameNowThen = false;
+
+          PlayerIds.forEach(Id => {
+            if(PlayerDatas[Id].moveTween){
+              PlayerDatas[Id].moveTween.cancel();
+            }
+          });
+
+          let Timeout = scene.setTimeout(function () {
+            // 5秒後に行う処理
+            let sotugyoY = 0;
+            let taigakuY = 0;
+            PlayerIds.forEach(Id => {
+              //プレイヤーオブジェクト削除
+              PlayerDatas[Id].Main_Player.hide();
+  
+              //卒業・退学リスト作成
+              if (PlayerDatas[Id].sotuThen == true){
+                sotugyolabels.push(user_add(scene,PlayerDatas[Id].Name,sotugyoY));
+                sotugyoY += 70;
+              }
+              else{
+                taigakulabels.push(user_add(scene,PlayerDatas[Id].Name,taigakuY));
+                taigakuY += 70;
+              }
+            });
+
+            //bgm停止
+            bgm1.stop();
+
+            //背景削除
+            background.hide();
+
+            //卒業・退学リスト用背景・ヘッダー生成
+            backLabel.show();
+            strLabel.show();
+            strLabel.invalidate();
+
+            //卒業用のBGMを流す
+            bgm2 = scene.asset.getAudio("/audio/hotaru_piano_5").play().changeVolume(0.1);
+
+            gameendThen = true;
+          }, 5000);
+
+          break;
+
+        case "endroll" :
+          let sotuNow = true;
+          let taiNow = false;
+          let endThen = false;
+  
+          //卒業
+          if (sotugyolabels.length > 0){
+            if (sotuNow == true){
+              sotugyolabels = userList_show(sotugyolabels);
+              if (showEnd_Then(sotugyolabels) == true){
+                sotuNow = false;
+                taiNow = true;
+              }
+            }
+          }
+          else{
+            sotuNow = false;
+            taiNow = true;
+          }
+  
+          //退学
+          if (taigakulabels.length > 0){
+            if (taiNow == true){
+              strLabel.text = "退学";
+              strLabel.invalidate();
+              taigakulabels = userList_show(taigakulabels);
+              if (showEnd_Then(taigakulabels) == true){
+                taiNow = false;
+                endThen = true;
+              }
+            }
+          }
+          else if (sotuNow == false){
+            taiNow = false;
+            endThen = true;
+          }
+          
+          //最終処理に遷移(オブジェクト削除)
+          if (endThen == true){
+            gameendThen = false;
+            strLabel.hide();
+            backLabel.hide();
+            sotugyoThen = true;
+          }
+
+          break;
+
+        case "sotugyo":
+          let sotugyo_Obj = [];
+          if (PlayerDatas[broadcasterPlayerId].sotuThen == true){
+            //放送主が卒業時
+            let sotugyo_Image = new g.FrameSprite({scene: scene, src: scene.assets["sotugyo"], parent: backlayer,opacity: 1, touchable: false});
+            sotugyo_Obj.push(sotugyo_Image);
+          }
+          else{
+            //放送主が退学時
+            let newsX = g.game.width * 0.1;
+            //容疑者
+            let suspect_Label = new g.FilledRect({scene: scene,width: 800, height: 70,
+               cssColor: "red", opacity: 7, x: newsX, y: g.game.height - 210});
+            sotugyo_Obj.push(suspect_Label);
+            let suspect_text = new g.Label({
+              scene: scene, x: newsX, y: g.game.height - 210, font: font, text: " " + PlayerDatas[broadcasterPlayerId].Name + "容疑者(12)", fontSize: 50, 
+              textColor: "white", opacity: 1,touchable: false});
+            sotugyo_Obj.push(suspect_text);
+    
+            //ニュース本文
+            let Main_Label = new g.FilledRect({scene: scene, width: 1000, height: 125,
+               cssColor: "black", opacity: 0.5, x: newsX, y: g.game.height - 140});
+            sotugyo_Obj.push(Main_Label);
+            let Main_text1 = new g.Label({
+              scene: scene, x: newsX, y: g.game.height - 140, font: font, text: "「２人組が作れないから退学させられた」", fontSize: 50, 
+              textColor: "white", opacity: 1,touchable: false});
+            sotugyo_Obj.push(Main_text1);
+            let Main_text2 = new g.Label({
+              scene: scene, x: newsX, y: g.game.height - 80, font: font, text: " などと訳の分からない供述を続けている", fontSize: 50, 
+              textColor: "white", opacity: 1,touchable: false});
+            sotugyo_Obj.push(Main_text2);
+  
+            //ニュースヘッダー画像
+            let heddar_Image = new g.FrameSprite({scene: scene, src: scene.assets["taiho"], parent: 
+              backlayer,opacity: 1, touchable: false, x: g.game.width * 0.7, y: g.game.height * 0.01});
+            sotugyo_Obj.push(heddar_Image);
+          }
+  
+          //オブジェクト生成
+          sotugyo_Obj.forEach(Obj => {scene.append(Obj); Obj.modified();});
+          sotugyoThen = false;
+
         default:
           break;
       }
@@ -438,140 +578,20 @@ function main(param) {
         }
         else{
           //タイムアップ(gametimeが０以下になれば)したらこちらに遷移
-          //タイマー削除
-          timeLabel.hide();
-
-          gameNowThen = false;
-
-          let Timeout = scene.setTimeout(function () {
-            // 5秒後に行う処理
-            let sotugyoY = 0;
-            let taigakuY = 0;
-            PlayerIds.forEach(Id => {
-              //プレイヤーオブジェクト削除
-              PlayerDatas[Id].Main_Player.hide();
-  
-              //卒業・退学リスト作成
-              if (PlayerDatas[Id].sotuThen == true){
-                sotugyolabels.push(user_add(scene,PlayerDatas[Id].Name,sotugyoY));
-                sotugyoY += 70;
-              }
-              else{
-                taigakulabels.push(user_add(scene,PlayerDatas[Id].Name,taigakuY));
-                taigakuY += 70;
-              }
-            });
-
-            //bgm停止
-            bgm1.stop();
-
-            //背景削除
-            background.hide();
-
-            //卒業・退学リスト用背景・ヘッダー生成
-            backLabel.show();
-            strLabel.show();
-            strLabel.invalidate();
-
-            //卒業用のBGMを流す
-            bgm2 = scene.asset.getAudio("/audio/hotaru_piano_5").play().changeVolume(0.1);
-
-            gameendThen = true;
-          }, 5000);
+          g.game.raiseEvent(new g.MessageEvent({ message: "delayAdd" }));
         }
       }
 
 
       if (gameendThen == true){
         //卒業・退学一覧処理
-        let sotuNow = true;
-        let taiNow = false;
-        let endThen = false;
-
-        //卒業
-        if (sotugyolabels.length > 0){
-          if (sotuNow == true){
-            sotugyolabels = userList_show(sotugyolabels);
-            if (showEnd_Then(sotugyolabels) == true){
-              sotuNow = false;
-              taiNow = true;
-            }
-          }
-        }
-        else{
-          sotuNow = false;
-          taiNow = true;
-        }
-
-        //退学
-        if (taigakulabels.length > 0){
-          if (taiNow == true){
-            strLabel.text = "退学";
-            strLabel.invalidate();
-            taigakulabels = userList_show(taigakulabels);
-            if (showEnd_Then(taigakulabels) == true){
-              taiNow = false;
-              endThen = true;
-            }
-          }
-        }
-        else if (sotuNow == false){
-          taiNow = false;
-          endThen = true;
-        }
-        
-        //最終処理に遷移(オブジェクト削除)
-        if (endThen == true){
-          gameendThen = false;
-          strLabel.hide();
-          backLabel.hide();
-          sotugyoThen = true;
-        }
+        g.game.raiseEvent(new g.MessageEvent({ message: "endroll" }));
       }
 
 
       if (sotugyoThen == true){
         //最終処理
-        let sotugyo_Obj = [];
-        if (PlayerDatas[broadcasterPlayerId].sotuThen == true){
-          //放送主が卒業時
-          let sotugyo_Image = new g.FrameSprite({scene: scene, src: scene.assets["sotugyo"], parent: backlayer,opacity: 1, touchable: false});
-          sotugyo_Obj.push(sotugyo_Image);
-        }
-        else{
-          //放送主が退学時
-          let newsX = g.game.width * 0.1;
-          //容疑者
-          let suspect_Label = new g.FilledRect({scene: scene,width: 800, height: 70,
-             cssColor: "red", opacity: 7, x: newsX, y: g.game.height - 210});
-          sotugyo_Obj.push(suspect_Label);
-          let suspect_text = new g.Label({
-            scene: scene, x: newsX, y: g.game.height - 210, font: font, text: " " + PlayerDatas[broadcasterPlayerId].Name + "容疑者(12)", fontSize: 50, 
-            textColor: "white", opacity: 1,touchable: false});
-          sotugyo_Obj.push(suspect_text);
-  
-          //ニュース本文
-          let Main_Label = new g.FilledRect({scene: scene, width: 1000, height: 125,
-             cssColor: "black", opacity: 0.5, x: newsX, y: g.game.height - 140});
-          sotugyo_Obj.push(Main_Label);
-          let Main_text1 = new g.Label({
-            scene: scene, x: newsX, y: g.game.height - 140, font: font, text: "「２人組が作れないから退学させられた」", fontSize: 50, 
-            textColor: "white", opacity: 1,touchable: false});
-          sotugyo_Obj.push(Main_text1);
-          let Main_text2 = new g.Label({
-            scene: scene, x: newsX, y: g.game.height - 80, font: font, text: " などと訳の分からない供述を続けている", fontSize: 50, 
-            textColor: "white", opacity: 1,touchable: false});
-          sotugyo_Obj.push(Main_text2);
-
-          //ニュースヘッダー画像
-          let heddar_Image = new g.FrameSprite({scene: scene, src: scene.assets["taiho"], parent: 
-            backlayer,opacity: 1, touchable: false, x: g.game.width * 0.7, y: g.game.height * 0.01});
-          sotugyo_Obj.push(heddar_Image);
-        }
-
-        //オブジェクト生成
-        sotugyo_Obj.forEach(Obj => {scene.append(Obj); Obj.modified();});
-        sotugyoThen = false;
+        g.game.raiseEvent(new g.MessageEvent({ message: "sotugyo" }));
       }
     });
   });
@@ -617,7 +637,7 @@ String.prototype.bytes = function () {
 };
 
 function userList_show(labels){
-  let labelwait = 2.5;
+  let labelwait = 0.5;
   labels.forEach(label =>{
     if (label.y < 70){
       label.hide();
