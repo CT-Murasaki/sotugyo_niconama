@@ -333,6 +333,53 @@ function main(param) {
           gamesecondLabel.invalidate();
           break;
 
+        case "endRollAdd":
+          gameNowThen = false;
+
+          //タイマー削除
+          timeLabel.hide();
+          PlayerIds.forEach(Id => {
+            //プレイヤーオブジェクト削除
+            if(PlayerDatas[Id].moveTween){
+              PlayerDatas[Id].moveTween.cancel();
+            }
+          });
+
+          let Timeout = scene.setTimeout(function () {
+            // 5秒後に行う処理
+            let sotugyoY = 0;
+            let taigakuY = 0;
+            PlayerIds.forEach(Id => {
+              //プレイヤーオブジェクト削除
+              PlayerDatas[Id].Main_Player.hide();
+  
+              //卒業・退学リスト作成
+              if (PlayerDatas[Id].sotuThen == true){
+                sotugyolabels.push(user_add(scene,PlayerDatas[Id].Name,sotugyoY));
+                sotugyoY += 70;
+              }
+              else{
+                taigakulabels.push(user_add(scene,PlayerDatas[Id].Name,taigakuY));
+                taigakuY += 70;
+              }
+            });
+
+            //bgm停止
+            bgm1.stop();
+
+            //背景削除
+            background.hide();
+
+            //卒業・退学リスト用背景・ヘッダー生成
+            backLabel.show();
+            strLabel.show();
+            strLabel.invalidate();
+
+            //卒業用のBGMを流す
+            bgm2 = scene.asset.getAudio("/audio/hotaru_piano_5").play().changeVolume(0.1);
+
+            gameendThen = true;
+          }, 5000);
         default:
           break;
       }
@@ -438,46 +485,7 @@ function main(param) {
         }
         else{
           //タイムアップ(gametimeが０以下になれば)したらこちらに遷移
-          //タイマー削除
-          timeLabel.hide();
-
-          gameNowThen = false;
-
-          let Timeout = scene.setTimeout(function () {
-            // 5秒後に行う処理
-            let sotugyoY = 0;
-            let taigakuY = 0;
-            PlayerIds.forEach(Id => {
-              //プレイヤーオブジェクト削除
-              PlayerDatas[Id].Main_Player.hide();
-  
-              //卒業・退学リスト作成
-              if (PlayerDatas[Id].sotuThen == true){
-                sotugyolabels.push(user_add(scene,PlayerDatas[Id].Name,sotugyoY));
-                sotugyoY += 70;
-              }
-              else{
-                taigakulabels.push(user_add(scene,PlayerDatas[Id].Name,taigakuY));
-                taigakuY += 70;
-              }
-            });
-
-            //bgm停止
-            bgm1.stop();
-
-            //背景削除
-            background.hide();
-
-            //卒業・退学リスト用背景・ヘッダー生成
-            backLabel.show();
-            strLabel.show();
-            strLabel.invalidate();
-
-            //卒業用のBGMを流す
-            bgm2 = scene.asset.getAudio("/audio/hotaru_piano_5").play().changeVolume(0.1);
-
-            gameendThen = true;
-          }, 5000);
+          g.game.raiseEvent(new g.MessageEvent({ message: "endRollAdd" }));
         }
       }
 
