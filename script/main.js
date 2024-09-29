@@ -333,40 +333,13 @@ function main(param) {
           gamesecondLabel.invalidate();
           break;
 
-        case "endRollAdd":
-          console.log("endRollAdd start");
-          console.log(PlayerDatas);
-
-          gameNowThen = false;
-
-          //タイマー削除
-          timeLabel.hide();
-          PlayerIds.forEach(Id => {
-            //プレイヤーオブジェクト削除
-            if(PlayerDatas[Id].moveTween){
-              PlayerDatas[Id].moveTween.cancel();
-            }
-          });
-
+        case "GameWait":
           let Timeout = scene.setTimeout(function () {
-            // 5秒後に行う処理
-            let sotugyoY = 0;
-            let taigakuY = 0;
             PlayerIds.forEach(Id => {
               //プレイヤーオブジェクト削除
               PlayerDatas[Id].Main_Player.hide();
-  
-              //卒業・退学リスト作成
-              if (PlayerDatas[Id].sotuThen == true){
-                sotugyolabels.push(user_add(scene,PlayerDatas[Id].Name,sotugyoY));
-                sotugyoY += 70;
-              }
-              else{
-                taigakulabels.push(user_add(scene,PlayerDatas[Id].Name,taigakuY));
-                taigakuY += 70;
-              }
             });
-
+          
             //bgm停止
             bgm1.stop();
 
@@ -380,25 +353,8 @@ function main(param) {
 
             //卒業用のBGMを流す
             bgm2 = scene.asset.getAudio("/audio/hotaru_piano_5").play().changeVolume(0.1);
-
-            gameendThen = true;
-
-            console.log("endRollAdd end");
-
-            console.log(PlayerDatas);
-            console.log(Timeout);
-            console.log(sotugyolabels);
-            console.log(taigakulabels);
-            
-            console.log(gameendThen);
+              gameendThen = true;
           }, 5000);
-
-          console.log(PlayerDatas);
-          console.log(Timeout);
-          console.log(sotugyolabels);
-          console.log(taigakulabels);
-          
-          console.log(gameendThen);
           break;
 
         default:
@@ -506,7 +462,37 @@ function main(param) {
         }
         else{
           //タイムアップ(gametimeが０以下になれば)したらこちらに遷移
-          g.game.raiseEvent(new g.MessageEvent({ message: "endRollAdd" }));
+          console.log("endRollAdd start");
+          console.log(PlayerDatas);
+
+          gameNowThen = false;
+
+          let sotugyoY = 0;
+          let taigakuY = 0;
+          //タイマー削除
+          timeLabel.hide();
+
+          PlayerIds.forEach(Id => {
+            if(PlayerDatas[Id].moveTween){
+              PlayerDatas[Id].moveTween.cancel();
+            }
+
+            //卒業・退学リスト作成
+            if (PlayerDatas[Id].sotuThen == true){
+              sotugyolabels.push(user_add(scene,PlayerDatas[Id].Name,sotugyoY));
+              sotugyoY += 70;
+            }
+            else{
+              taigakulabels.push(user_add(scene,PlayerDatas[Id].Name,taigakuY));
+              taigakuY += 70;
+            }
+          });
+
+          // 5秒後に行う処理
+          g.game.raiseEvent(new g.MessageEvent({ message: "GameWait" }));
+
+          console.log("endRollAdd end");
+          
         }
       }
 
