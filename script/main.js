@@ -334,6 +334,9 @@ function main(param) {
           break;
 
         case "endRollAdd":
+          console.log("endRollAdd start");
+          console.log(PlayerDatas);
+
           gameNowThen = false;
 
           //タイマー削除
@@ -379,7 +382,25 @@ function main(param) {
             bgm2 = scene.asset.getAudio("/audio/hotaru_piano_5").play().changeVolume(0.1);
 
             gameendThen = true;
+
+            console.log("endRollAdd end");
+
+            console.log(PlayerDatas);
+            console.log(Timeout);
+            console.log(sotugyolabels);
+            console.log(taigakulabels);
+            
+            console.log(gameendThen);
           }, 5000);
+
+          console.log(PlayerDatas);
+          console.log(Timeout);
+          console.log(sotugyolabels);
+          console.log(taigakulabels);
+          
+          console.log(gameendThen);
+          break;
+
         default:
           break;
       }
