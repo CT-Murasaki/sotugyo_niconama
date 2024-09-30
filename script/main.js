@@ -20,9 +20,12 @@ function main(param) {
 
   let startThen = false;
   let gameNowThen = false;
+  let waitthen = false;
   let gameendThen = false;
   let sotugyoThen = false;
+
   let gamesecond = 15;
+  let waittime = 0;
 
   let gametime = 0;
   let titleObj,settingObj,settingstrs,sankaObj,startObj,playercntObj
@@ -286,12 +289,12 @@ function main(param) {
     /////////////////////////
     ////卒業(退学)リスト用////
     /////////////////////////
-    let backLabel = new g.FilledRect({scene: scene,hidden:true,
+    let backLabel = new g.FilledRect({scene: scene,hidden:true, local : true,
       width: g.game.width, height: g.game.height, cssColor: "black", opacity: 1});
     scene.append(backLabel);
 
-    let strLabel = new g.Label({scene: scene,x: g.game.width / 2.4,y: 20,font: font,
-      text: "卒業",fontSize: 50, textColor: "white",opacity: 1,touchable: true ,hidden:true});
+    let strLabel = new g.Label({scene: scene,x: 0,y: 20,font: font,widthAutoAdjust:false, width:g.game.width,local : true,
+      textAlign:"center" ,text: "卒業",fontSize: 50, textColor: "white",opacity: 1,touchable: true ,hidden:true});
     scene.append(strLabel);
     
 
@@ -439,21 +442,14 @@ function main(param) {
         else{
           //タイムアップ(gametimeが０以下になれば)したらこちらに遷移
           gameNowThen = false;
-          gameendThen = true;
-
-          //bgm停止
-          bgm1.stop();
-
-          //背景・タイマー削除
-          background.hide();
+          waitthen = true;
+          
+          //タイマー削除
           timeLabel.hide();
-
+          
           let sotugyoY = 0;
           let taigakuY = 0;
           PlayerIds.forEach(Id => {
-            //プレイヤーオブジェクト削除
-            PlayerDatas[Id].Main_Player.hide();
-
             //卒業・退学リスト作成
             if (PlayerDatas[Id].sotuThen == true){
               sotugyolabels.push(user_add(scene,PlayerDatas[Id].Name,sotugyoY));
@@ -464,6 +460,25 @@ function main(param) {
               taigakuY += 60;
             }
           });
+        }
+      }
+
+      if (waitthen == true){
+        waittime += 1 / g.game.fps;
+        if (waittime > 5){
+          waitthen = false;
+
+          //bgm停止
+          bgm1.stop();
+
+          PlayerIds.forEach(Id => {
+            //プレイヤーオブジェクト削除
+            PlayerDatas[Id].Main_Player.hide();
+          });
+
+          //背景削除
+          background.hide();
+          timeLabel.hide();
 
           //卒業・退学リスト用背景・ヘッダー生成
           backLabel.show();
@@ -472,6 +487,8 @@ function main(param) {
 
           //卒業用のBGMを流す
           bgm2 = scene.asset.getAudio("/audio/hotaru_piano_5").play().changeVolume(0.1);
+
+          gameendThen = true;
         }
       }
 
@@ -529,7 +546,7 @@ function main(param) {
         let sotugyo_Obj = [];
         if (PlayerDatas[broadcasterPlayerId].sotuThen == true){
           //放送主が卒業時
-          let sotugyo_Image = new g.FrameSprite({scene: scene, src: scene.assets["sotugyo"], parent: backlayer,opacity: 1, touchable: false});
+          let sotugyo_Image = new g.FrameSprite({scene: scene, src: scene.assets["sotugyo"], parent: backlayer,opacity: 1, touchable: false,local : true});
           sotugyo_Obj.push(sotugyo_Image);
         }
         else{
@@ -537,29 +554,29 @@ function main(param) {
           let newsX = g.game.width * 0.1;
           //容疑者
           let suspect_Label = new g.FilledRect({scene: scene,width: 800, height: 70,
-             cssColor: "red", opacity: 7, x: newsX, y: g.game.height - 210});
+             cssColor: "red", opacity: 7, x: newsX, y: g.game.height - 210,local : true});
           sotugyo_Obj.push(suspect_Label);
           let suspect_text = new g.Label({
             scene: scene, x: newsX, y: g.game.height - 210, font: font, text: " " + PlayerDatas[broadcasterPlayerId].Name + "容疑者(12)", fontSize: 50, 
-            textColor: "white", opacity: 1,touchable: false});
+            textColor: "white", opacity: 1,touchable: false,local : true});
           sotugyo_Obj.push(suspect_text);
   
           //ニュース本文
           let Main_Label = new g.FilledRect({scene: scene, width: 1000, height: 125,
-             cssColor: "black", opacity: 0.5, x: newsX, y: g.game.height - 140});
+             cssColor: "black", opacity: 0.5, x: newsX, y: g.game.height - 140,local : true});
           sotugyo_Obj.push(Main_Label);
           let Main_text1 = new g.Label({
             scene: scene, x: newsX, y: g.game.height - 140, font: font, text: "「２人組が作れないから退学させられた」", fontSize: 50, 
-            textColor: "white", opacity: 1,touchable: false});
+            textColor: "white", opacity: 1,touchable: false,local : true});
           sotugyo_Obj.push(Main_text1);
           let Main_text2 = new g.Label({
             scene: scene, x: newsX, y: g.game.height - 80, font: font, text: " などと訳の分からない供述を続けている", fontSize: 50, 
-            textColor: "white", opacity: 1,touchable: false});
+            textColor: "white", opacity: 1,touchable: false,local : true});
           sotugyo_Obj.push(Main_text2);
 
           //ニュースヘッダー画像
           let heddar_Image = new g.FrameSprite({scene: scene, src: scene.assets["taiho"], parent: 
-            backlayer,opacity: 1, touchable: false, x: g.game.width * 0.7, y: g.game.height * 0.01});
+            backlayer,opacity: 1, touchable: false, x: g.game.width * 0.7, y: g.game.height * 0.01,local : true});
           sotugyo_Obj.push(heddar_Image);
         }
 
@@ -589,29 +606,16 @@ function getrandom(min,max,exc){
 
 //卒業(退学)リスト作成用
 function user_add(scene,Nametxt,plusY){
-  let userLabel = new g.Label({
-    scene: scene, x: (g.game.width * 0.1) + ((33 - Nametxt.bytes()) * 0.5 * 29), y: g.game.height + plusY, font: font, text: Nametxt, fontSize: 50, 
-    textColor: "white", opacity: 1,touchable: false, hidden:true});
-  scene.append(userLabel);
+  let userLabel = new g.Label({textAlign: "center",widthAutoAdjust : false,local : true,
+    scene: scene, x: 0, y: g.game.height + plusY, font: font, text: Nametxt, fontSize: 50, 
+    textColor: "white", opacity: 1,touchable: false, hidden:true, width:g.game.width});
   userLabel.invalidate();
+  scene.append(userLabel);
   return userLabel;
 }
 
-String.prototype.bytes = function () {
-  var length = 0;
-  for (var i = 0; i < this.length; i++) {
-    var c = this.charCodeAt(i);
-    if ((c >= 0x0 && c < 0x81) || (c === 0xf8f0) || (c >= 0xff61 && c < 0xffa0) || (c >= 0xf8f1 && c < 0xf8f4)) {
-      length += 1;
-    } else {
-      length += 2;
-    }
-  }
-  return length;
-};
-
 function userList_show(labels){
-  let labelwait = (labels.length / 5);
+  let labelwait = 2;
   labels.forEach(label =>{
     if (label.y < 70){
       label.hide();
