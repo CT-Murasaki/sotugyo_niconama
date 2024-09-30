@@ -5,8 +5,7 @@ let resolvePlayerInfo = require("@akashic-extension/resolve-player-info");
 let tween_animation = require("@akashic-extension/akashic-timeline");
 let PlayerDatas = [{}];
 let PlayerIds = [];
-let sotugyolabels = [];
-let taigakulabels = [];
+
 let font = new g.DynamicFont({
   game: g.game,
   fontFamily: "sans-serif",
@@ -17,6 +16,9 @@ function main(param) {
   let assetIds = ["title","rule","haikei","bgm1","Main_botti","NPC_botti","Nushi_botti","Main_OK","NPC_OK","Nushi_OK","bgm2","sotugyo","taiho"];
   let scene = new g.Scene({ game: g.game ,assetIds: assetIds});
   let timeline = new tween_animation.Timeline(scene);
+
+  let sotugyolabels = [];
+  let taigakulabels = [];
 
   let startThen = false;
   let gameNowThen = false;
@@ -443,10 +445,10 @@ function main(param) {
           //タイムアップ(gametimeが０以下になれば)したらこちらに遷移
           gameNowThen = false;
           waitthen = true;
-          
+
           //タイマー削除
           timeLabel.hide();
-          
+
           let sotugyoY = 0;
           let taigakuY = 0;
           console.log("before create name list");
@@ -459,7 +461,7 @@ function main(param) {
               console.warn(`PlayerDatas[${Id}].Name is invalid: ${PlayerDatas[Id].Name}`);
               return;
             }
-
+      
             //卒業・退学リスト作成
             if (PlayerDatas[Id].sotuThen == true){
               sotugyolabels.push(user_add(scene,PlayerDatas[Id].Name,sotugyoY));
@@ -505,6 +507,12 @@ function main(param) {
 
 
       if (gameendThen == true){
+        //エラー処理
+        if (sotugyolabels == undefined || taigakulabels == undefined){
+          console.error("UserLabel undefined");
+          return;
+        }
+
         //卒業・退学一覧処理
         let sotuNow = true;
         let taiNow = false;
