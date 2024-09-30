@@ -290,8 +290,8 @@ function main(param) {
       width: g.game.width, height: g.game.height, cssColor: "black", opacity: 1});
     scene.append(backLabel);
 
-    let strLabel = new g.Label({scene: scene,x: 0,y: 20,font: font,widthAutoAdjust:false, width:g.game.width,
-      textAlign:"center" ,text: "卒業",fontSize: 50, textColor: "white",opacity: 1,touchable: true ,hidden:true});
+    let strLabel = new g.Label({scene: scene,x: g.game.width / 2.4,y: 20,font: font,
+      text: "卒業",fontSize: 50, textColor: "white",opacity: 1,touchable: true ,hidden:true});
     scene.append(strLabel);
     
 
@@ -331,30 +331,6 @@ function main(param) {
           }
           gamesecondLabel.text = gamesecond + "秒";
           gamesecondLabel.invalidate();
-          break;
-
-        case "GameWait":
-          let Timeout = scene.setTimeout(function () {
-            PlayerIds.forEach(Id => {
-              //プレイヤーオブジェクト削除
-              PlayerDatas[Id].Main_Player.hide();
-            });
-          
-            //bgm停止
-            bgm1.stop();
-
-            //背景削除
-            background.hide();
-
-            //卒業・退学リスト用背景・ヘッダー生成
-            backLabel.show();
-            strLabel.show();
-            strLabel.invalidate();
-
-            //卒業用のBGMを流す
-            bgm2 = scene.asset.getAudio("/audio/hotaru_piano_5").play().changeVolume(0.1);
-              gameendThen = true;
-          }, 5000);
           break;
 
         default:
@@ -462,37 +438,40 @@ function main(param) {
         }
         else{
           //タイムアップ(gametimeが０以下になれば)したらこちらに遷移
-          console.log("endRollAdd start");
-          console.log(PlayerDatas);
-
           gameNowThen = false;
+          gameendThen = true;
+
+          //bgm停止
+          bgm1.stop();
+
+          //背景・タイマー削除
+          background.hide();
+          timeLabel.hide();
 
           let sotugyoY = 0;
           let taigakuY = 0;
-          //タイマー削除
-          timeLabel.hide();
-
           PlayerIds.forEach(Id => {
-            if(PlayerDatas[Id].moveTween){
-              PlayerDatas[Id].moveTween.cancel();
-            }
+            //プレイヤーオブジェクト削除
+            PlayerDatas[Id].Main_Player.hide();
 
             //卒業・退学リスト作成
             if (PlayerDatas[Id].sotuThen == true){
               sotugyolabels.push(user_add(scene,PlayerDatas[Id].Name,sotugyoY));
-              sotugyoY += 70;
+              sotugyoY += 60;
             }
             else{
               taigakulabels.push(user_add(scene,PlayerDatas[Id].Name,taigakuY));
-              taigakuY += 70;
+              taigakuY += 60;
             }
           });
 
-          // 5秒後に行う処理
-          g.game.raiseEvent(new g.MessageEvent({ message: "GameWait" }));
+          //卒業・退学リスト用背景・ヘッダー生成
+          backLabel.show();
+          strLabel.show();
+          strLabel.invalidate();
 
-          console.log("endRollAdd end");
-          
+          //卒業用のBGMを流す
+          bgm2 = scene.asset.getAudio("/audio/hotaru_piano_5").play().changeVolume(0.1);
         }
       }
 
@@ -610,16 +589,29 @@ function getrandom(min,max,exc){
 
 //卒業(退学)リスト作成用
 function user_add(scene,Nametxt,plusY){
-  let userLabel = new g.Label({textAlign: "center",widthAutoAdjust : false,
-    scene: scene, x: 0, y: g.game.height + plusY, font: font, text: Nametxt, fontSize: 50, 
-    textColor: "white", opacity: 1,touchable: false, hidden:true, width:g.game.width});
-  userLabel.invalidate();
+  let userLabel = new g.Label({
+    scene: scene, x: (g.game.width * 0.1) + ((33 - Nametxt.bytes()) * 0.5 * 29), y: g.game.height + plusY, font: font, text: Nametxt, fontSize: 50, 
+    textColor: "white", opacity: 1,touchable: false, hidden:true});
   scene.append(userLabel);
+  userLabel.invalidate();
   return userLabel;
 }
 
+String.prototype.bytes = function () {
+  var length = 0;
+  for (var i = 0; i < this.length; i++) {
+    var c = this.charCodeAt(i);
+    if ((c >= 0x0 && c < 0x81) || (c === 0xf8f0) || (c >= 0xff61 && c < 0xffa0) || (c >= 0xf8f1 && c < 0xf8f4)) {
+      length += 1;
+    } else {
+      length += 2;
+    }
+  }
+  return length;
+};
+
 function userList_show(labels){
-  let labelwait = 2;
+  let labelwait = (labels.length / 5);
   labels.forEach(label =>{
     if (label.y < 70){
       label.hide();
