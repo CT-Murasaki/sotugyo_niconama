@@ -119,7 +119,8 @@ function main(param) {
       scene.append(playerImage);
       playerImage.invalidate();
 
-      PlayerDatas[ev.player.id] = {Name:ev.player.name, Main_Player:playerImage, moveX:0, moveY:0, imageD:0, sotuThen:false, destoroyed:false, imageOk:imageOk, imageNg:imageNg};
+      const name = ev.player.name ?? "██████████"; // 名前はnullになることがあるので、その対策としてデフォルト値を設定
+      PlayerDatas[ev.player.id] = {Name:name, Main_Player:playerImage, moveX:0, moveY:0, imageD:0, sotuThen:false, destoroyed:false, imageOk:imageOk, imageNg:imageNg};
 
       playercntLabel.text = String(PlayerIds.length) + "人",
       playercntLabel.invalidate();
@@ -451,17 +452,7 @@ function main(param) {
 
           let sotugyoY = 0;
           let taigakuY = 0;
-          console.log("before create name list");
           PlayerIds.forEach(Id => {
-            if(PlayerDatas[Id] == null){
-              console.warn(`PlayerDatas[${Id}] is invalid: ${PlayerDatas[Id]}`);
-              return;
-            }
-            if(PlayerDatas[Id].Name == null){
-              console.warn(`PlayerDatas[${Id}].Name is invalid: ${PlayerDatas[Id].Name}`);
-              return;
-            }
-      
             //卒業・退学リスト作成
             if (PlayerDatas[Id].sotuThen == true){
               sotugyolabels.push(user_add(scene,PlayerDatas[Id].Name,sotugyoY));
@@ -472,7 +463,6 @@ function main(param) {
               taigakuY += 60;
             }
           });
-          console.log("after create name list");
         }
       }
 
