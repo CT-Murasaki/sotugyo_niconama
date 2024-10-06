@@ -452,17 +452,7 @@ function main(param) {
 
           let sotugyoY = 0;
           let taigakuY = 0;
-          console.log("before create name list");
           PlayerIds.forEach(Id => {
-            if(PlayerDatas[Id] == null){
-              console.warn(`PlayerDatas[${Id}] is invalid: ${PlayerDatas[Id]}`);
-              return;
-            }
-            if(PlayerDatas[Id].Name == null){
-              console.warn(`PlayerDatas[${Id}].Name is invalid: ${PlayerDatas[Id].Name}`);
-              return;
-            }
-      
             //卒業・退学リスト作成
             if (PlayerDatas[Id].sotuThen == true){
               sotugyolabels.push(user_add(scene,PlayerDatas[Id].Name,sotugyoY));
@@ -473,7 +463,6 @@ function main(param) {
               taigakuY += 60;
             }
           });
-          console.log("after create name list");
         }
       }
 
