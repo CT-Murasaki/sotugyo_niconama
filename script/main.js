@@ -119,7 +119,8 @@ function main(param) {
       scene.append(playerImage);
       playerImage.invalidate();
 
-      PlayerDatas[ev.player.id] = {Name:ev.player.name, Main_Player:playerImage, moveX:0, moveY:0, imageD:0, sotuThen:false, destoroyed:false, imageOk:imageOk, imageNg:imageNg};
+      const name = ev.player.name ?? "██████████"; // 名前はnullになることがあるので、その対策としてデフォルト値を設定
+      PlayerDatas[ev.player.id] = {Name:name, Main_Player:playerImage, moveX:0, moveY:0, imageD:0, sotuThen:false, destoroyed:false, imageOk:imageOk, imageNg:imageNg};
 
       playercntLabel.text = String(PlayerIds.length) + "人",
       playercntLabel.invalidate();
