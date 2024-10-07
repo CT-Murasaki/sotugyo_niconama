@@ -464,6 +464,11 @@ function main(param) {
           //タイマー削除
           timeLabel.hide();
 
+          PlayerIds.forEach(Id => {
+            //全プレイヤーの移動を強制停止
+            PlayerDatas[Id].moveTween?.cancel();
+          });
+
           let sotugyoY = 0;
           let taigakuY = 0;
           PlayerIds.forEach(Id => {
