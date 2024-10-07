@@ -31,7 +31,13 @@
 			"type": "audio",
 			"path": "audio/huon",
 			"systemId": "music",
-			"duration": 2000
+			"duration": 77375,
+			"hint": {
+				"extensions": [
+					".aac",
+					".ogg"
+				]
+			}
 		},
 		"Main_botti": {
 			"type": "image",
@@ -73,7 +79,13 @@
 			"type": "audio",
 			"path": "audio/hotaru_piano_5",
 			"systemId": "music",
-			"duration": 2000
+			"duration": 61716,
+			"hint": {
+				"extensions": [
+					".aac",
+					".ogg"
+				]
+			}
 		},
 		"sotugyo": {
 			"type": "image",
@@ -84,8 +96,37 @@
 		"taiho": {
 			"type": "image",
 			"width": 390,
-			"height": 220,
+			"height": 227,
 			"path": "image/taiho.png"
+		},
+		"icon": {
+			"type": "image",
+			"path": "image/icon.png",
+			"width": 224,
+			"height": 224
+		},
+		"Main_NG": {
+			"type": "image",
+			"path": "image/Main_NG.png",
+			"width": 45,
+			"height": 59
+		},
+		"NPC_NG": {
+			"type": "image",
+			"path": "image/NPC_NG.png",
+			"width": 45,
+			"height": 59
+		},
+		"Nushi_NG": {
+			"type": "image",
+			"path": "image/Nushi_NG.png",
+			"width": 45,
+			"height": 59
+		},
+		"_bootstrap": {
+			"type": "script",
+			"path": "script/_bootstrap.js",
+			"global": true
 		}
 	},
 	"environment": {

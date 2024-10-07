@@ -13,7 +13,7 @@ let font = new g.DynamicFont({
 });
 
 function main(param) {
-  let assetIds = ["title","rule","haikei","bgm1","Main_botti","NPC_botti","Nushi_botti","Main_OK","NPC_OK","Nushi_OK","bgm2","sotugyo","taiho"];
+  let assetIds = ["title","rule","haikei","bgm1","Main_botti","NPC_botti","Nushi_botti","Main_OK","NPC_OK","Nushi_OK","Main_NG","NPC_NG","Nushi_NG","bgm2","sotugyo","taiho"];
   let scene = new g.Scene({ game: g.game ,assetIds: assetIds});
   let timeline = new tween_animation.Timeline(scene);
 
@@ -111,17 +111,31 @@ function main(param) {
 
       // プレイヤー画像
       const imageOk = scene.assets[isLocalPlayer ? "Main_OK" : Nushi_Then ? "Nushi_OK" : "NPC_OK"];
-      const imageNg = scene.assets[isLocalPlayer ? "Main_botti" : Nushi_Then ? "Nushi_botti" : "NPC_botti"];
+      const imageNg = scene.assets[isLocalPlayer ? "Main_NG" : Nushi_Then ? "Nushi_NG" : "NPC_NG"];
+      const imageBotti = scene.assets[isLocalPlayer ? "Main_botti" : Nushi_Then ? "Nushi_botti" : "NPC_botti"];
 
       PlayerIds.push(ev.player.id);
-      let playerImage = new g.FrameSprite({scene: scene, src: imageNg,
+      let playerImage = new g.FrameSprite({scene: scene, src: imageBotti,
         x: getrandom(22.5,1240,-1), y: getrandom(y_limit,670,-1), opacity: 1, local: false, hidden:true});
       scene.append(playerImage);
       playerImage.invalidate();
 
       const name = ev.player.name ?? "██████████"; // 名前はnullになることがあるので、その対策としてデフォルト値を設定
-      PlayerDatas[ev.player.id] = {Name:name, Main_Player:playerImage, moveX:0, moveY:0, imageD:0, sotuThen:false, destoroyed:false, imageOk:imageOk, imageNg:imageNg};
-
+      PlayerDatas[ev.player.id] = {
+        Name:name,
+        Main_Player:playerImage,
+        moveX:0,
+        moveY:0,
+        imageD:0,
+        state:"botti",
+        sotuThen:false,
+        destoroyed:false,
+        images:{
+          "ok":imageOk,
+          "ng":imageNg,
+          "botti":imageBotti
+        }
+      };
       playercntLabel.text = String(PlayerIds.length) + "人",
       playercntLabel.invalidate();
       settingstrs.forEach(Obj => {Obj.invalidate();});
@@ -381,7 +395,8 @@ function main(param) {
           //卒業判定
           PlayerIds.forEach(Id => {
             //卒業判定
-            let result = false;
+            //最初はぼっち扱いで、重複が見つからなかったらぼっちのまま終了
+            let result = "botti";
             let zyuhukuId = "";
             //重複しているキャラを探索
             for (let i = 0; i < PlayerIds.length; i++){
@@ -395,19 +410,16 @@ function main(param) {
                   else{
                     //重複が２人以上なら２人組では無いので退学
                     zyuhukuId = "";
+                    result = "ng";
                     break;
                   }
                 }
               }
             }
 
-            if (zyuhukuId == ""){
-              //重複無し(ぼっち) or 重複が２人以上なら退学
-              result = false;
-            }
-            else {
+            if (zyuhukuId !== "") {
               //重複が一人なら一旦卒業扱い
-              result = true;
+              result = "ok";
 
               //ペア側の重複キャラを探索
               for (let i = 0; i < PlayerIds.length; i++){
@@ -415,7 +427,7 @@ function main(param) {
                 if (zyuhukuId != Id && zyuhukuId != Id2 && Id != Id2){
                   if (g.Collision.withinAreas(PlayerDatas[zyuhukuId].Main_Player, PlayerDatas[Id2].Main_Player, overlap_threshold)){
                     //ペア側に別の重複キャラがいるなら２人組では無いので退学
-                    result = false;
+                    result = "ng";
                     break;
                   }
                 }
@@ -423,9 +435,10 @@ function main(param) {
             }
 
             //プレイヤー画像更新
-            if (PlayerDatas[Id].sotuThen != result){
-              PlayerDatas[Id].sotuThen = result;
-              PlayerDatas[Id].Main_Player.src = result ? PlayerDatas[Id].imageOk : PlayerDatas[Id].imageNg;
+            if (PlayerDatas[Id].state !== result){
+              PlayerDatas[Id].state = result;
+              PlayerDatas[Id].sotuThen = result === "ok" ? true : false;
+              PlayerDatas[Id].Main_Player.src = PlayerDatas[Id].images[result];
               PlayerDatas[Id].Main_Player.invalidate();
             }
           });
