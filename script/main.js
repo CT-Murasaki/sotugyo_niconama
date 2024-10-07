@@ -97,6 +97,14 @@ function main(param) {
     });
     sankaObj = [sankaBack,sankaButton];
 
+    ///////////////////////////////////////////
+    ////操作キャラ表示優先度制御用オブジェクト////
+    ///////////////////////////////////////////
+    const players_back = new g.E({scene: scene, x: 0, y: 0, width: g.game.width, height: g.game.height, touchable: false, local: true});
+    scene.append(players_back);
+
+    const players_front = new g.E({scene: scene, x: 0, y: 0, width: g.game.width, height: g.game.height, touchable: false, local: true});
+    scene.append(players_front);
 
     ///////////////////////////////////////
     ////操作キャラ生成・プレイヤー情報記録////
@@ -108,6 +116,7 @@ function main(param) {
 
       const isLocalPlayer = ev.player.id === g.game.selfId;
       const Nushi_Then = ev.player.id === broadcasterPlayerId;
+      const isHighPriority = isLocalPlayer || Nushi_Then;
 
       // プレイヤー画像
       const imageOk = scene.assets[isLocalPlayer ? "Main_OK" : Nushi_Then ? "Nushi_OK" : "NPC_OK"];
@@ -116,8 +125,8 @@ function main(param) {
 
       PlayerIds.push(ev.player.id);
       let playerImage = new g.FrameSprite({scene: scene, src: imageBotti,
-        x: getrandom(22.5,1240,-1), y: getrandom(y_limit,670,-1), opacity: 1, local: false, hidden:true});
-      scene.append(playerImage);
+        x: getrandom(22.5,1240,-1), y: getrandom(y_limit,670,-1), opacity: 1, local: true, hidden:true});
+      (isHighPriority ? players_front : players_back).append(playerImage);
       playerImage.invalidate();
 
       const name = ev.player.name ?? "██████████"; // 名前はnullになることがあるので、その対策としてデフォルト値を設定
