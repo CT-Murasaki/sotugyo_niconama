@@ -1,5 +1,5 @@
 let y_limit = 80;
-let overlap_threshold = 25;
+let overlap_threshold = 45;
 let broadcasterPlayerId = "";
 let resolvePlayerInfo = require("@akashic-extension/resolve-player-info");
 let tween_animation = require("@akashic-extension/akashic-timeline");
@@ -387,11 +387,7 @@ function main(param) {
             for (let i = 0; i < PlayerIds.length; i++){
               let Id2 = PlayerIds[i];
               if (Id != Id2){
-                let x1 = PlayerDatas[Id].Main_Player.x;
-                let x2 = PlayerDatas[Id2].Main_Player.x;
-                let y1 = PlayerDatas[Id].Main_Player.y;
-                let y2 = PlayerDatas[Id2].Main_Player.y;
-                if (Math.abs(x1 - x2) < overlap_threshold && Math.abs(y1 - y2) < overlap_threshold){
+                if (g.Collision.withinAreas(PlayerDatas[Id].Main_Player, PlayerDatas[Id2].Main_Player, overlap_threshold)){
                   if (zyuhukuId == ""){
                     //相手方のIdを記憶
                     zyuhukuId = Id2;
@@ -417,11 +413,7 @@ function main(param) {
               for (let i = 0; i < PlayerIds.length; i++){
                 let Id2 = PlayerIds[i];
                 if (zyuhukuId != Id && zyuhukuId != Id2 && Id != Id2){
-                  let x1 = PlayerDatas[zyuhukuId].Main_Player.x;
-                  let x2 = PlayerDatas[Id2].Main_Player.x;
-                  let y1 = PlayerDatas[zyuhukuId].Main_Player.y;
-                  let y2 = PlayerDatas[Id2].Main_Player.y;
-                  if (Math.abs(x1 - x2) < overlap_threshold && Math.abs(y1 - y2) < overlap_threshold){
+                  if (g.Collision.withinAreas(PlayerDatas[zyuhukuId].Main_Player, PlayerDatas[Id2].Main_Player, overlap_threshold)){
                     //ペア側に別の重複キャラがいるなら２人組では無いので退学
                     result = false;
                     break;
