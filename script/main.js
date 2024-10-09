@@ -129,7 +129,12 @@ function main(param) {
       (isHighPriority ? players_front : players_back).append(playerImage);
       playerImage.invalidate();
 
-      const name = ev.player.name ?? "██████████"; // 名前はnullになることがあるので、その対策としてデフォルト値を設定
+      let name = ev.player.name;
+      // 名前はnullになることがあるので、その対策としてデフォルト値を設定
+      if (name == null) {
+        name = "██████████";
+      }
+
       PlayerDatas[ev.player.id] = {
         Name:name,
         Main_Player:playerImage,
@@ -466,7 +471,9 @@ function main(param) {
 
           PlayerIds.forEach(Id => {
             //全プレイヤーの移動を強制停止
-            PlayerDatas[Id].moveTween?.cancel();
+            if(PlayerDatas[Id].moveTween){
+              PlayerDatas[Id].moveTween.cancel();
+            }
           });
 
           let sotugyoY = 0;
