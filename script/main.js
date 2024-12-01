@@ -110,49 +110,53 @@ function main(param) {
     ////操作キャラ生成・プレイヤー情報記録////
     ///////////////////////////////////////
     g.game.onPlayerInfo.add((ev) => {
-      // 各プレイヤーが名前利用許諾のダイアログに応答した時、通知されます。
-      // ev.player.name にそのプレイヤーの名前が含まれます。
-      // (ev.player.id には (最初から) プレイヤーIDが含まれています)
+      // リログ時にプレイヤーが多重生成されるので対応
+      // PlayerIds内に入力されたプレイヤーIDが無い時のみ処理
+      if (PlayerIds.indexOf(ev.player.id) == -1){
+        // 各プレイヤーが名前利用許諾のダイアログに応答した時、通知されます。
+        // ev.player.name にそのプレイヤーの名前が含まれます。
+        // (ev.player.id には (最初から) プレイヤーIDが含まれています)
 
-      const isLocalPlayer = ev.player.id === g.game.selfId;
-      const Nushi_Then = ev.player.id === broadcasterPlayerId;
-      const isHighPriority = isLocalPlayer || Nushi_Then;
+        const isLocalPlayer = ev.player.id === g.game.selfId;
+        const Nushi_Then = ev.player.id === broadcasterPlayerId;
+        const isHighPriority = isLocalPlayer || Nushi_Then;
 
-      // プレイヤー画像
-      const imageOk = scene.assets[isLocalPlayer ? "Main_OK" : Nushi_Then ? "Nushi_OK" : "NPC_OK"];
-      const imageNg = scene.assets[isLocalPlayer ? "Main_NG" : Nushi_Then ? "Nushi_NG" : "NPC_NG"];
-      const imageBotti = scene.assets[isLocalPlayer ? "Main_botti" : Nushi_Then ? "Nushi_botti" : "NPC_botti"];
+        // プレイヤー画像
+        const imageOk = scene.assets[isLocalPlayer ? "Main_OK" : Nushi_Then ? "Nushi_OK" : "NPC_OK"];
+        const imageNg = scene.assets[isLocalPlayer ? "Main_NG" : Nushi_Then ? "Nushi_NG" : "NPC_NG"];
+        const imageBotti = scene.assets[isLocalPlayer ? "Main_botti" : Nushi_Then ? "Nushi_botti" : "NPC_botti"];
 
-      PlayerIds.push(ev.player.id);
-      let playerImage = new g.FrameSprite({scene: scene, src: imageBotti,
-        x: getrandom(22.5,1240,-1), y: getrandom(y_limit,670,-1), opacity: 1, local: true, hidden:true});
-      (isHighPriority ? players_front : players_back).append(playerImage);
-      playerImage.invalidate();
+        PlayerIds.push(ev.player.id);
+        let playerImage = new g.FrameSprite({scene: scene, src: imageBotti,
+          x: getrandom(22.5,1240,-1), y: getrandom(y_limit,670,-1), opacity: 1, local: true, hidden:true});
+        (isHighPriority ? players_front : players_back).append(playerImage);
+        playerImage.invalidate();
 
-      let name = ev.player.name;
-      // 名前はnullになることがあるので、その対策としてデフォルト値を設定
-      if (name == null) {
-        name = "██████████";
-      }
-
-      PlayerDatas[ev.player.id] = {
-        Name:name,
-        Main_Player:playerImage,
-        moveX:0,
-        moveY:0,
-        imageD:0,
-        state:"botti",
-        sotuThen:false,
-        destoroyed:false,
-        images:{
-          "ok":imageOk,
-          "ng":imageNg,
-          "botti":imageBotti
+        let name = ev.player.name;
+        // 名前はnullになることがあるので、その対策としてデフォルト値を設定
+        if (name == null) {
+          name = "██████████";
         }
-      };
-      playercntLabel.text = String(PlayerIds.length) + "人",
-      playercntLabel.invalidate();
-      settingstrs.forEach(Obj => {Obj.invalidate();});
+
+        PlayerDatas[ev.player.id] = {
+          Name:name,
+          Main_Player:playerImage,
+          moveX:0,
+          moveY:0,
+          imageD:0,
+          state:"botti",
+          sotuThen:false,
+          destoroyed:false,
+          images:{
+            "ok":imageOk,
+            "ng":imageNg,
+            "botti":imageBotti
+          }
+        };
+        playercntLabel.text = String(PlayerIds.length) + "人",
+        playercntLabel.invalidate();
+        settingstrs.forEach(Obj => {Obj.invalidate();});
+      }
     });
 
 
